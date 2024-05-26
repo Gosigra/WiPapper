@@ -1,0 +1,136 @@
+﻿<Window x:Class="WiPapper.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WiPapper"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        mc:Ignorable="d"
+        Title="ВиПэйппер" MinHeight="322" MinWidth="357"
+        MaxHeight="322" MaxWidth="357"
+        ContentRendered="Window_ContentRendered"
+        Closing="Window_Closing"
+        Closed="Window_Closed"
+        Icon="Resources/1.ico"
+        >
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="15*"/>
+            <ColumnDefinition Width="37*"/>
+            <ColumnDefinition Width="67*"/>
+        </Grid.ColumnDefinitions>
+
+        <TabControl TabStripPlacement="Left" Grid.ColumnSpan="3" >
+            <TabItem Header="Обои" Margin="-3,-2,0,2" >
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="5px"/>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="5px"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="5px"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="5px"/>
+                    </Grid.RowDefinitions>
+
+                    <!--<TextBox x:Name="PathToWall" Grid.Column="3" Grid.Row="3" Width="150" Height="25"/>-->
+                    <Button x:Name="SelectWall" Content="Выбрать обои" Grid.Column="3" Grid.Row="3" Grid.ColumnSpan="2" Width="150" Height="25" Click="SelectWall_Click"/>
+                    <Button x:Name="SetWallpaperButton" Content="Установить" Grid.Column="3" Grid.Row="4" Width="100" Height="20" Margin="5" FontSize="9" Click="SetWallpaperButton_Click" IsEnabled="False"/>
+                    <Button x:Name="UnSetWallpaper" Content="Убрать" Grid.Column="4" Grid.Row="4" Width="100" Height="20" Margin="5" FontSize="9" Click="UnSetWallpaper_Click"/>
+
+                    <TextBlock Grid.Column="3" Grid.Row="6" Text="Звук" Margin="5"/>
+                    <Slider x:Name="Volume" Grid.Column="3" Grid.Row="7" Grid.ColumnSpan="2" ValueChanged="Volume_ValueChanged"/>
+
+                    <ComboBox x:Name="ChooseAFitComboBox" Grid.Column="3" Grid.Row="8" Margin="0 10 5 0" SelectionChanged="ChooseAFitComboBox_SelectionChanged">
+                        <ComboBoxItem>Заполнение</ComboBoxItem>
+                        <ComboBoxItem>По размеру</ComboBoxItem>
+                        <ComboBoxItem>Растянуть</ComboBoxItem>
+                        <ComboBoxItem>По центру</ComboBoxItem>
+                    </ComboBox>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Панель" Height="20" Margin="-3,-5,0,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="5px"/>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="5px"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="5px"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="5px"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Text="Акцент" Margin="5 0 0 0" Grid.Row="1"  Grid.Column="1"/>
+                    <ComboBox x:Name="FakeAccentComboBox" Margin="3 0 5 2" Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" SelectionChanged="FakeAccentComboBox_SelectionChanged" >
+                        <ComboBoxItem>Отключить</ComboBoxItem>
+                        <ComboBoxItem>Градиент</ComboBoxItem>
+                        <ComboBoxItem>Прозрачный градиент</ComboBoxItem>
+                        <ComboBoxItem>Размытие</ComboBoxItem>
+                        <ComboBoxItem>Альтернативное размытие</ComboBoxItem>
+                    </ComboBox>
+                    <ComboBox x:Name="AccentComboBox" Visibility="Collapsed" Margin="3 30 5 2" Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" SelectionChanged="AccentComboBox_SelectionChanged"/>
+
+
+                    <TextBlock Text="Цвет" Margin="5" Grid.Row="2"  Grid.Column="1"/>
+                    <xctk:ColorPicker x:Name="ColorPicker" Margin="0 0 0 4" Width="30" Height="22" ColorMode="ColorCanvas" ShowDropDownButton="False" ShowTabHeaders="False" Grid.Row="2" Grid.Column="2" SelectedColorChanged="ColorPicker_SelectedColorChanged" />
+                    <CheckBox x:Name="WindowsAccentColorCheckBox" Grid.Row="2" Grid.Column="3" Margin="3 5 0 2" Checked="WindowsAccentColorCheckBox_Changed" Unchecked="WindowsAccentColorCheckBox_Changed">
+                        <TextBlock Text="Использовать цвет Windows" TextWrapping="WrapWithOverflow" Width="100" />
+                    </CheckBox>
+
+                    <TextBlock Text="Раскрасить" Margin="5 0 0 0" Grid.Row="3" Grid.Column="1"/>
+                    <CheckBox x:Name="ColorizeCB" Grid.Row="3" Grid.Column="2" Margin="2 2 22 2" Checked="ColorizeCB_Changed" Unchecked="ColorizeCB_Changed" />
+
+                    <TextBlock Text="Прозрачность" Margin="5 2 5 0" Grid.Row="4" Grid.Column="1"/>
+                    <Slider x:Name="AccentAlphaSlider" Margin="3 2 0 0" Minimum="0" Maximum="255" Grid.Row="4" Grid.Column="2" Grid.ColumnSpan="2" Thumb.DragCompleted="AccentAlphaSlider_DragCompleted" Thumb.DragStarted="AccentAlphaSlider_DragStarted" ValueChanged="AccentAlphaSlider_ValueChanged"/>
+
+                    <Button x:Name="EditSwitchButton" Content="Основная панель задач" Margin="5,5,0,0" Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="3" Click="EditSwitchButton_Click"/>
+
+                    <Button x:Name="StartStopButton" Content="Начать" Grid.Row="8" Grid.Column="3" Click="StartStopButton_Click"/>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Настройки" Height="20" Margin="-3,-8,0,0">
+                <Grid>
+                    <TextBlock Text="Настройки" FontSize="18" Margin="0 0 0 0" VerticalAlignment="Top" HorizontalAlignment="Center"/>
+
+                    <CheckBox x:Name="StartMinimizedCheckBox" Content="Запустить свёрнутым" Margin="5 35 0 0" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <CheckBox x:Name="SetWallpapperWhenLaunchedCheckBox" Content="Установить обои при запуске приложения" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="5,55,0,0" />
+                    <CheckBox x:Name="StartWhenLaunchedCheckBox" Content="Начать работу приложения при запуске" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="5,75,0,0" />
+                    <CheckBox x:Name="UseMaximizedSettingsCheckBox" Content="Разные настройки при развёрнутом окне" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="5,95,0,0" Checked="UseMaximizedSettingsCheckBox_Changed" Unchecked="UseMaximizedSettingsCheckBox_Changed"/>
+                    <CheckBox x:Name="StartWithWindowsCheckBox" Content="Запустить вместе с Windows" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="5,115,0,0" Checked="StartWithWindowsCheckBox_Changed" Unchecked="StartWithWindowsCheckBox_Changed"/>
+
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+    </Grid>
+</Window>
