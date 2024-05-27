@@ -87,10 +87,10 @@ namespace WiPapper
             ni = new NotifyIcon();                                                                                                     // Инициализация иконки системного трея
             Stream iconStream = System.Windows.Application.GetResourceStream(new Uri("Resources/1.ico", UriKind.Relative)).Stream;
             ni.Icon = new Icon(iconStream);           
-            ni.Click += delegate (object sender, EventArgs args)
+            ni.Click += (object sender, EventArgs args) =>
             {
-                    this.Show();
-                    this.WindowState = WindowState.Normal;
+                this.Show();
+                this.WindowState = WindowState.Normal;
             };
 
 
@@ -223,53 +223,52 @@ namespace WiPapper
                 windowList[i].Width = ScreenList[i].Width;
                 windowList[i].Height = ScreenList[i].Height;
 
-                windowList[i].Initialized += new EventHandler((s, ea) =>
+                windowList[i].Initialized += new EventHandler((s, ea) => // тут надо зарефакторить media- это для медиа, а для html надо cefsharp 
                 {
-                    media = new MediaElement();
-                    Grid grid = new Grid();
-                    windowList[i].Content = grid;
-                    grid.Children.Add(media);
-
-                    media.Source = fileMedia;
-                    media.LoadedBehavior = MediaState.Manual;  //454532542254
-                    media.Volume = 0;
-
-                    media.MediaEnded += (send, eArgs) =>
+                    if (fileMedia.AbsolutePath.Contains("index.html"))
                     {
-                        media.Position = new TimeSpan(0, 0, 1);
-                        media.Play();
-                    };
-                    media.Play();
-                    currentlyPlaying = true;
-
-                    HWND windowHandle = new WindowInteropHelper(windowList[i]).Handle;
-                    User32.SetParent(windowHandle, workerw);
-                });
+                        //метод 1 - (сделать проверки для всякого (например нужно ли запись включать и тд)+ можно асинхронность но потом под конец(сначало главное чтобы работало))
+                        
+                    }
+                    else
+                    {
+                        //метод 2-в него то что ниже
+                        SetMediaAsWallpaper(windowList[i]);
+                    }                    
+                });                
                 windowList[i].UpdateLayout();
                 windowList[i].Show();
+                WallpaperStretchTypeComboBox_SelectionChanged(null, null);
             }
         }
 
-        private void ChooseAFitComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void SetMediaAsWallpaper(Window windowList)
+        {
+            media = new MediaElement();
+            Grid grid = new Grid();
+            windowList.Content = grid;
+            grid.Children.Add(media);
+
+            media.Source = fileMedia;
+            media.LoadedBehavior = MediaState.Manual;  //454532542254
+            media.Volume = 0;
+
+            media.MediaEnded += (send, eArgs) =>
+            {
+                media.Position = new TimeSpan(0, 0, 1);
+                media.Play();
+            };
+            media.Play();
+            currentlyPlaying = true;
+
+            HWND windowHandle = new WindowInteropHelper(windowList).Handle;
+            User32.SetParent(windowHandle, workerw);
+        }
+
+        private void WallpaperStretchTypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!WindowInitialized || media == null) return;
-            switch (ChooseAFitComboBox.SelectedIndex)
-            {
-                case 0:                    
-                    media.Stretch = Stretch.UniformToFill;
-                    break;
-                case 1:
-                    media.Stretch = Stretch.Uniform;
-                    break;
-                case 2:
-                    media.Stretch = Stretch.Fill;
-                    break;
-                case 3:                    
-                    media.Stretch = Stretch.None;
-                    break;
-                default:
-                    break;
-            }
+            media.Stretch = (Stretch)WallpaperStretchTypeComboBox.SelectedIndex;
         }
 
         private void UnSetWallpaper_Click(object sender, RoutedEventArgs e)
@@ -354,7 +353,7 @@ namespace WiPapper
         private void SaveSettings() // Метод для сохранения настроек
         {
             TaskBarOptions.Options.WallpapperPath = fileMedia?.ToString();
-            TaskBarOptions.Options.Settings.ChooseAFitComboBoxIndex = (byte)ChooseAFitComboBox.SelectedIndex;
+            TaskBarOptions.Options.Settings.ChooseAFitComboBoxIndex = (byte)WallpaperStretchTypeComboBox.SelectedIndex;
             TaskBarOptions.Options.Settings.MainTaskbarStyle.AccentState = (byte)((int)AccentComboBox.SelectedItem);
             TaskBarOptions.Options.Settings.MainTaskbarStyle.GradientColor = ColorPicker.SelectedColor.ToString();
             TaskBarOptions.Options.Settings.MainTaskbarStyle.WindowsAccentAlpha = (byte)AccentAlphaSlider.Value;
@@ -380,7 +379,7 @@ namespace WiPapper
             if (TaskBarOptions.Options.Settings.StartWhenLaunched) { StartStopButton_Click(null, null); }
             if (TaskBarOptions.Options.Settings.SetWallpapperWhenLaunched) { SetWallpaperButton_Click(null, null); SetWallpaperButton.IsEnabled = true; }
 
-            ChooseAFitComboBox.SelectedIndex = TaskBarOptions.Options.Settings.ChooseAFitComboBoxIndex;
+            WallpaperStretchTypeComboBox.SelectedIndex = TaskBarOptions.Options.Settings.ChooseAFitComboBoxIndex;
 
             // Listen for name change changes across all processes/threads on current desktop
             // Установка хука для отслеживания изменения состояния окна
@@ -655,12 +654,12 @@ namespace WiPapper
             alphaDragStarted = true;
         }
 
-        private void AccentAlphaSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private void AccentAlphaSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) // по факту нахуй не надо, но я думаю добавить поле где человек может вручную написать проценты а не ползунком 
         {   // Обработчик события изменения значения ползунка WindowsAccentAlphaSlider
             if (!WindowInitialized) return;
-            if (alphaDragStarted) // Если убрать ! то будет в режиме реального времени (но хз мешает чемуто или памяти мнгого или тд хз почему так сделал чел)
+            if (!alphaDragStarted) // Если убрать ! то будет в режиме реального времени (но хз мешает чемуто или памяти мнгого или тд хз почему так сделал чел)  // проверял там аль размытие лагало вернул "!"
             {
-                SetWindowsAccentAlpha((byte)AccentAlphaSlider.Value);
+                //SetWindowsAccentAlpha((byte)AccentAlphaSlider.Value);
             }
         }
 

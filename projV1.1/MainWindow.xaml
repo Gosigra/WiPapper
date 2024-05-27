@@ -55,14 +55,15 @@
                     <TextBlock Grid.Column="3" Grid.Row="6" Text="Звук" Margin="5"/>
                     <Slider x:Name="Volume" Grid.Column="3" Grid.Row="7" Grid.ColumnSpan="2" ValueChanged="Volume_ValueChanged"/>
 
-                    <ComboBox x:Name="ChooseAFitComboBox" Grid.Column="3" Grid.Row="8" Margin="0 10 5 0" SelectionChanged="ChooseAFitComboBox_SelectionChanged">
-                        <ComboBoxItem>Заполнение</ComboBoxItem>
-                        <ComboBoxItem>По размеру</ComboBoxItem>
-                        <ComboBoxItem>Растянуть</ComboBoxItem>
+                    <ComboBox x:Name="WallpaperStretchTypeComboBox" Grid.Column="3" Grid.Row="8" Margin="0 10 5 0" SelectionChanged="WallpaperStretchTypeComboBox_SelectionChanged" SelectedIndex="0">
                         <ComboBoxItem>По центру</ComboBoxItem>
+                        <ComboBoxItem>Растянуть</ComboBoxItem>
+                        <ComboBoxItem>По размеру</ComboBoxItem>
+                        <ComboBoxItem>Заполнение</ComboBoxItem>
                     </ComboBox>
                 </Grid>
             </TabItem>
+            
             <TabItem Header="Панель" Height="20" Margin="-3,-5,0,0">
                 <Grid>
                     <Grid.ColumnDefinitions>
