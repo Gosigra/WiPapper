@@ -20,6 +20,7 @@ using Microsoft.Win32;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
+
 //using static Vanara.PInvoke.User32;
 //using static Vanara.PInvoke.Gdi32;
 
@@ -83,7 +84,10 @@ namespace WiPapper
         public MainWindow()
         {
             InitializeComponent();
-            
+
+            HtmlWallpaperSetter.SetHtmlWallpaper.Host();
+
+
             ni = new NotifyIcon();                                                                                                     // Инициализация иконки системного трея
             Stream iconStream = System.Windows.Application.GetResourceStream(new Uri("Resources/1.ico", UriKind.Relative)).Stream;
             ni.Icon = new Icon(iconStream);           
@@ -109,7 +113,7 @@ namespace WiPapper
             */
 
             windowList = new List<Window>();
-            ScreenList = new List<Rectangle>();            
+            ScreenList = new List<Rectangle>();
             for (int i = 0; i < Screen.AllScreens.Length; i++)
             {
                 ScreenList.Add(Screen.AllScreens[i].Bounds);                                                                                                 //получаю рабочий стол и его рабочую область ({X = 0 Y = 0 Width = 1920 Height = 1040}) //working area
@@ -206,12 +210,13 @@ namespace WiPapper
         {
             FindWorkerWindow();
 
-             if (media != null)
-             {
+            //if (media != null)
+            if (currentlyPlaying == true)
+            {
                 UnSetWall();
-             }
+            }
 
-            for (int i = 0; i < windowList.Count; i++)
+            for (int i = 0; i < windowList.Count; i++) // можно цикл убрать и сделать для 1 монитора иначе потом для не 1го монитора надо асинхронность
             {
                 windowList[i] = new Window();
 
@@ -228,21 +233,26 @@ namespace WiPapper
                     if (fileMedia.AbsolutePath.Contains("index.html"))
                     {
                         //метод 1 - (сделать проверки для всякого (например нужно ли запись включать и тд)+ можно асинхронность но потом под конец(сначало главное чтобы работало))
-                        
+                        HtmlWallpaperSetter.SetHtmlWallpaper.SetMediaAsWallpaper(windowList[i]);
+                        currentlyPlaying = true;
+
                     }
                     else
                     {
                         //метод 2-в него то что ниже
-                        SetMediaAsWallpaper(windowList[i]);
-                    }                    
-                });                
+                        SetMediaAsWallpaper2(windowList[i]);
+                    }
+
+                    HWND windowHandle = new WindowInteropHelper(windowList[i]).Handle;
+                    User32.SetParent(windowHandle, workerw);
+                });
                 windowList[i].UpdateLayout();
                 windowList[i].Show();
                 WallpaperStretchTypeComboBox_SelectionChanged(null, null);
             }
         }
 
-        private void SetMediaAsWallpaper(Window windowList)
+        private void SetMediaAsWallpaper2(Window windowList)
         {
             media = new MediaElement();
             Grid grid = new Grid();
@@ -260,9 +270,6 @@ namespace WiPapper
             };
             media.Play();
             currentlyPlaying = true;
-
-            HWND windowHandle = new WindowInteropHelper(windowList).Handle;
-            User32.SetParent(windowHandle, workerw);
         }
 
         private void WallpaperStretchTypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -280,7 +287,7 @@ namespace WiPapper
         {
             if (currentlyPlaying == true)
             {
-                media.Stop();
+                media?.Stop();
                 media = null;
                 for (int i = 0; i < windowList.Count; i++)
                 {

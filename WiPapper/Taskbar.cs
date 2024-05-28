@@ -47,6 +47,7 @@ namespace WiPapper
         public static List<Taskbar> Bars { get; set; } //Статическое свойство Bars типа List<Taskbar>, представляющее список объектов Taskbar.
         public static bool MaximizedStateChanged { get; set; } //Статическое свойство MaximizedStateChanged типа bool, указывающее, изменилось ли состояние максимизации окна.
         private static string tbType; //используемое для определения типа панели задачи (максимизированной или основной).
+        
 
         static Taskbars() //Конструктор класса Taskbars, вызывается при инициализации класса.
         {
