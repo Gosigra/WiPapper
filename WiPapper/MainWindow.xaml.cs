@@ -19,6 +19,9 @@ using Extensions;
 using Microsoft.Win32;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using WiPapper.Wallpaper.HtmlWallpaper;
+
+//Получать высоту панели задач и передавать в браузер её + цвет панели чтобы на сайте можно было сделать визуализацию как будто от панели задач столбцы(подумал что можно без высоты и чтобы разработчики сами её писали)
 
 
 //using static Vanara.PInvoke.User32;
@@ -85,7 +88,7 @@ namespace WiPapper
         {
             InitializeComponent();
 
-            HtmlWallpaperSetter.SetHtmlWallpaper.Host();
+            SetHtmlWallpaper.StartHttpListener();
 
 
             ni = new NotifyIcon();                                                                                                     // Инициализация иконки системного трея
@@ -230,12 +233,14 @@ namespace WiPapper
 
                 windowList[i].Initialized += new EventHandler((s, ea) => // тут надо зарефакторить media- это для медиа, а для html надо cefsharp 
                 {
+                    
                     if (fileMedia.AbsolutePath.Contains("index.html"))
                     {
                         //метод 1 - (сделать проверки для всякого (например нужно ли запись включать и тд)+ можно асинхронность но потом под конец(сначало главное чтобы работало))
-                        HtmlWallpaperSetter.SetHtmlWallpaper.SetMediaAsWallpaper(windowList[i]);
+                        SetHtmlWallpaper.FilePath = Path.GetDirectoryName(fileMedia.LocalPath);
+                        SetHtmlWallpaper.SetBrowserAsWallpaper(windowList[i]);
+                        
                         currentlyPlaying = true;
-
                     }
                     else
                     {
