@@ -18,6 +18,7 @@ using System.Windows.Controls;
 using System.Windows.Interop;
 using Vanara.PInvoke;
 using WiPapper.Wallpaper.HtmlWallpaper;
+using CefSharp.DevTools.Network;
 
 namespace WiPapper.Wallpaper.HtmlWallpaper
 {
@@ -47,7 +48,14 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
                 try
                 {
                     HttpListenerContext context = await listener.GetContextAsync();
-                    await ProcessRequest(context);
+                    HttpListenerRequest request = context.Request;
+                    HttpListenerResponse response = context.Response;
+
+                    string requestRezult = ProcessRequest(request);
+                    if (!string.IsNullOrEmpty(requestRezult))
+                    {
+                        await ProcessResponse(requestRezult, response);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -56,14 +64,10 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
             }
         }
 
-        private static async Task ProcessRequest(HttpListenerContext context)
+        private static string ProcessRequest(HttpListenerRequest request)
         {
-            HttpListenerRequest request = context.Request;
-            HttpListenerResponse response = context.Response;
-
             string filePath = String.Empty;
             string requestedFile = request.Url.AbsolutePath;
-            string message = request.QueryString["message"]; //без этого и через case
 
             switch (requestedFile)
             {
@@ -82,22 +86,11 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
                     break;
             }
 
-            //if (message != null)
-            //{
-            //    usePowerMethod = bool.Parse(message);
-            //    return;
-            //}
+            return filePath;
+        }
 
-            //if (requestedFile == "/") // Указывать путь до папки а не полностью до .html
-            //{
-            //    filePath = @"E:/test/test3/Новая папка/index.html";
-            //    //filePath = @"E:\test\test3\Новая папка\gyahgsdf\index(2).html";
-            //}
-            //else
-            //{
-            //    filePath = @"E:/test/test3/Новая папка" + requestedFile;
-            //}
-
+        private static async Task ProcessResponse(string filePath, HttpListenerResponse response)
+        {
             if (File.Exists(filePath))
             {
                 byte[] buffer = File.ReadAllBytes(filePath);

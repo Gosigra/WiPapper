@@ -61,7 +61,6 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
             var currentSession = smtc.GetCurrentSession();
 
             UpdateSession(currentSession);
-
             UpdateDetails();
         }
 
@@ -96,6 +95,7 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
         private static void UpdateInfo()
         {
             if (session == null) return;
+
             UpdateControls();
             UpdateDetails();
         }
@@ -113,7 +113,9 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
 
         private static async void UpdateDetails() // информация о медиа
         {
-            if (session == null) return;
+            if (session == null)
+                return;
+
             GlobalSystemMediaTransportControlsSessionMediaProperties properties;
             try
             {
@@ -137,17 +139,12 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
             mediaProperties.Title = properties.Title;
             mediaProperties.TrackNumber = properties.TrackNumber;
 
-
-            object[] abc = new object[] { mediaProperties };
-            SetHtmlWallpaper.Browser.ExecuteScriptAsync("updateInfoTest", abc);
-
             UpdateWebView();
         }
 
         private static async Task<string> GetThumbnailAsBase64String(IRandomAccessStreamReference Thumbnail)
         {
-            if (Thumbnail == null)
-                return null;
+            if (Thumbnail == null) return null;
 
             IRandomAccessStream fileStream = await Thumbnail.OpenReadAsync();
 
@@ -161,30 +158,22 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
             string base64String = $"data:image/png;base64,{Convert.ToBase64String(bytes)}";
 
             mediaProperties.ThumbnailURL = base64String;
-            //UpdateWebView();
 
             return base64String;
         }
 
         private static void UpdateWebView() //Отправка данных о медиа (Title, Artist и тд.).
         {
-            if (mediaProperties.ThumbnailURL != oldThumbnailUrl)
+            if (mediaProperties.ThumbnailURL != oldThumbnailUrl) return;
+
+            Application.Current.Dispatcher.Invoke(() =>
             {
-                Application.Current.Dispatcher.Invoke(() =>
+                if (SetHtmlWallpaper.Browser.IsLoaded)
                 {
-                    if (SetHtmlWallpaper.Browser.IsLoaded)
-                    {
-                        SetHtmlWallpaper.Browser.ExecuteScriptAsync("updateInfo", mediaProperties.Artist, mediaProperties.Title, mediaProperties.ThumbnailURL); //Добавить отправку всего.
-                        //CrBrowser.ExecuteScriptAsync("updateInfoTest", new object[] { model });
-                        oldThumbnailUrl = mediaProperties.ThumbnailURL;
-                    }
-                });
-            }
-            else
-            {
-                return;
-                //UpdateDetails(); //вроде все работало но потом сломалось я добавил return и все теперь тоже работает хз как
-            }
+                    SetHtmlWallpaper.Browser.ExecuteScriptAsync("updateInfo", mediaProperties.Artist, mediaProperties.Title, mediaProperties.ThumbnailURL); //Добавить отправку всего.                        
+                    oldThumbnailUrl = mediaProperties.ThumbnailURL ?? string.Empty; // проверить
+                }
+            });
         }
     }
 }

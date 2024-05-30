@@ -221,6 +221,8 @@ namespace WiPapper
 
             for (int i = 0; i < windowList.Count; i++) // можно цикл убрать и сделать для 1 монитора иначе потом для не 1го монитора надо асинхронность
             {
+                //Window window = new Window(); //сделать одно окно
+
                 windowList[i] = new Window();
 
                 windowList[i].WindowStyle = WindowStyle.None;
@@ -233,10 +235,9 @@ namespace WiPapper
 
                 windowList[i].Initialized += new EventHandler((s, ea) => // тут надо зарефакторить media- это для медиа, а для html надо cefsharp 
                 {
-                    
                     if (fileMedia.AbsolutePath.Contains("index.html"))
                     {
-                        //метод 1 - (сделать проверки для всякого (например нужно ли запись включать и тд)+ можно асинхронность но потом под конец(сначало главное чтобы работало))
+                        //метод 1 - (сделать проверки для всякого (например нужно ли запись включать и тд (проверить что будет если не обявить функцию (то есть код будет проверять какие функции есть в обоях при ошибке = false, значит метод не будет работать)))+ можно асинхронность но потом под конец(сначала главное чтобы работало))
                         SetHtmlWallpaper.FilePath = Path.GetDirectoryName(fileMedia.LocalPath);
                         SetHtmlWallpaper.SetBrowserAsWallpaper(windowList[i]);
                         
@@ -246,6 +247,8 @@ namespace WiPapper
                     {
                         //метод 2-в него то что ниже
                         SetMediaAsWallpaper2(windowList[i]);
+
+                        currentlyPlaying = true;
                     }
 
                     HWND windowHandle = new WindowInteropHelper(windowList[i]).Handle;
@@ -306,7 +309,7 @@ namespace WiPapper
         private void Volume_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (currentlyPlaying == true)
-                media.Volume = Volume.Value;            
+                media.Volume = Volume.Value;
         }
 
 
@@ -332,13 +335,13 @@ namespace WiPapper
 
 
 
-        #region Initializations
+        #region TaskBarInitializations(бля кароче заебался завтра)
         private void PopulateComboBoxes() //Этот метод PopulateComboBoxes() служит для заполнения элемента управления ComboBox (в данном случае, AccentStateComboBox) значениями перечисления AccentState
         {
-
+            // разобраться
             AccentComboBox.ItemsSource = Enum.GetValues(typeof(AccentState)).Cast<AccentState>();
-            FakeAccentComboBox.SelectedIndex = 0;
             AccentComboBox.SelectedIndex = 0;
+            FakeAccentComboBox.SelectedIndex = 0;
 
             //ChooseAFitComboBox.SelectedIndex = 0;
         }
@@ -359,7 +362,7 @@ namespace WiPapper
             {
                 fileMedia = new Uri(TaskBarOptions.Options.WallpapperPath);
             }
-            catch { }            
+            catch { }
         }
 
         private void SaveSettings() // Метод для сохранения настроек
@@ -372,7 +375,7 @@ namespace WiPapper
             TaskBarOptions.Options.Settings.MainTaskbarStyle.Colorize = ColorizeCB.IsChecked ?? false;
             TaskBarOptions.Options.Settings.MainTaskbarStyle.UseWindowsAccentColor = WindowsAccentColorCheckBox.IsChecked ?? false;
 
-            TaskBarOptions.Options.Settings.SetWallpapperWhenLaunched = SetWallpapperWhenLaunchedCheckBox.IsChecked ?? false;
+            TaskBarOptions.Options.Settings.SetWallpapperWhenLaunched = SetWallpapperWhenLaunchedCheckBox.IsChecked ?? false; //зачет тут false ?
             TaskBarOptions.Options.Settings.UseDifferentSettingsWhenMaximized = UseMaximizedSettingsCheckBox.IsChecked ?? false;
             TaskBarOptions.Options.Settings.StartMinimized = StartMinimizedCheckBox.IsChecked ?? false;
             TaskBarOptions.Options.Settings.StartWhenLaunched = StartWhenLaunchedCheckBox.IsChecked ?? false;
@@ -415,10 +418,10 @@ namespace WiPapper
         private void Window_Closed(object sender, EventArgs e)
         {
             Environment.Exit(0);
-        }           
+        }
         #endregion Destructors
 
-        #region Functions
+        #region Functions (по названию можно куда то убрать)
         private void ApplyToAllTaskbars()
         {
             Taskbars.Bars = new List<Taskbar>();
@@ -428,7 +431,7 @@ namespace WiPapper
                 if (FindTaskbarHandles) // Если нужно искать дескрипторы панелей задач
                 {
 
-                    Taskbars.Bars.Add(new Taskbar(User32.FindWindow("Shell_TrayWnd", null))); // Добавление главной панели задач в список                    
+                    Taskbars.Bars.Add(new Taskbar(User32.FindWindow("Shell_TrayWnd", null))); // Добавление главной панели задач в список
                     HWND otherBars = IntPtr.Zero;
 
                     // Поиск и добавление других панелей задач
@@ -470,7 +473,7 @@ namespace WiPapper
 
         private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled) //6 // Обработчик сообщений окна //5161151515115
         {
-            if (msg == WM_TASKBARCREATED) // Если получено сообщение о создании панели задач
+            if (msg == WM_TASKBARCREATED) // Если получено сообщение о создании панели задач(из будующего: речь идет о новом окне приложения я надеюсь?)
             {
                 FindTaskbarHandles = true; // Установка флага для поиска дескрипторов панелей задач
                 handled = true;
@@ -583,7 +586,7 @@ namespace WiPapper
 
         #endregion Functions
 
-        #region Control Handles
+        #region Control Handles( кнопочки и тд можно тут)
         private void StartStopButton_Click(object sender, RoutedEventArgs e) // Обработчик события нажатия кнопки Start/Stop
         {
             if (RunApplyTask)

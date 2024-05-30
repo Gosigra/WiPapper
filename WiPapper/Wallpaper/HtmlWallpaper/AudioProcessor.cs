@@ -17,6 +17,7 @@ using System.Text.Json;
 using System.Windows.Controls;
 using System.Windows.Interop;
 using Vanara.PInvoke;
+using System.Text.RegularExpressions;
 
 namespace WiPapper.Wallpaper.HtmlWallpaper
 {
@@ -24,7 +25,21 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
     {
         public static int Channels { get; set; } = 1;
 
-        public static void RecordAudioData() // channels, true = 2channels в host определить 
+        public static bool StartOrStopRecording {
+            set
+            {
+                if (value)
+                {
+                    RecordAudioData();
+                }
+                else
+                {
+                    //capture.StopRecording();  // но надо ли это если при закрытии обоев запись сама выключится (наверное)
+                }
+            }
+        }
+
+        public static void RecordAudioData() // channels, true = 2channels в host определить
         {
             var capture = new WasapiLoopbackCapture();
             capture.WaveFormat = new WaveFormat(48000, 16, Channels); // переменную для установки кол-ва каналов и обработку закрытия обоев(остановку записи(проверить может сама остановится при закрытии))
@@ -142,7 +157,6 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
             //string jsonAudioData2 = JsonConvert.SerializeObject(spectrumData);
             string jsonAudioData2 = System.Text.Json.JsonSerializer.Serialize(spectrumData);
             SetHtmlWallpaper.Browser.ExecuteScriptAsync("wallpaperAudioListener", jsonAudioData2);
-            Console.WriteLine("sended");
         }
     }
 }
