@@ -97,10 +97,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AppOptions\OptionsManager.cs" />
     <Compile Include="TaskBar\Extensions.cs" />
     <Compile Include="TaskBar\Globals.cs" />
-    <Compile Include="Taskbar.cs" />
-    <Compile Include="TaskBar\TaskBarOptions.cs" />
+    <Compile Include="TaskBar\Taskbar.cs" />
+    <Compile Include="AppOptions\ApplicationOptions.cs" />
     <Compile Include="Wallpaper\HtmlWallpaper\AudioProcessor.cs" />
     <Compile Include="Wallpaper\HtmlWallpaper\HtmlWallpaperSetter.cs" />
     <Compile Include="Wallpaper\HtmlWallpaper\MediaProperties.cs" />

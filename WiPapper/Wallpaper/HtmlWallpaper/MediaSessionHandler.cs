@@ -164,7 +164,7 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
 
         private static void UpdateWebView() //Отправка данных о медиа (Title, Artist и тд.).
         {
-            if (mediaProperties.ThumbnailURL != oldThumbnailUrl) return;
+            if (mediaProperties.ThumbnailURL == oldThumbnailUrl) return;
 
             Application.Current.Dispatcher.Invoke(() =>
             {

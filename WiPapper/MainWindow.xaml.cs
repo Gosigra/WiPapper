@@ -20,9 +20,9 @@ using Microsoft.Win32;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using WiPapper.Wallpaper.HtmlWallpaper;
+using WiPapper.AppOptions;
 
 //Получать высоту панели задач и передавать в браузер её + цвет панели чтобы на сайте можно было сделать визуализацию как будто от панели задач столбцы(подумал что можно без высоты и чтобы разработчики сами её писали)
-
 
 //using static Vanara.PInvoke.User32;
 //using static Vanara.PInvoke.Gdi32;
@@ -82,7 +82,7 @@ namespace WiPapper
         #endregion Declarations
 
 
-        NotifyIcon ni;
+        NotifyIcon notifyIcon;
 
         public MainWindow()
         {
@@ -91,10 +91,10 @@ namespace WiPapper
             SetHtmlWallpaper.StartHttpListener();
 
 
-            ni = new NotifyIcon();                                                                                                     // Инициализация иконки системного трея
+            notifyIcon = new NotifyIcon();                                                                                                     // Инициализация иконки системного трея
             Stream iconStream = System.Windows.Application.GetResourceStream(new Uri("Resources/1.ico", UriKind.Relative)).Stream;
-            ni.Icon = new Icon(iconStream);           
-            ni.Click += (object sender, EventArgs args) =>
+            notifyIcon.Icon = new Icon(iconStream);
+            notifyIcon.Click += (object sender, EventArgs args) =>
             {
                 this.Show();
                 this.WindowState = WindowState.Normal;
@@ -132,23 +132,23 @@ namespace WiPapper
         {
             if(WindowState == WindowState.Minimized)
             {
-                ni.BalloonTipTitle = "WiPaper";
-                ni.BalloonTipText = "WiPaper было свёрнуто";
-                ni.Visible = true;
-                ni.ShowBalloonTip(10000);
+                notifyIcon.BalloonTipTitle = "WiPaper";
+                notifyIcon.BalloonTipText = "WiPaper было свёрнуто";
+                notifyIcon.Visible = true;
+                notifyIcon.ShowBalloonTip(10000);
                 //ni.ShowBalloonTip(10000, "WiPaper", "WiPaper было свёрнуто", ToolTipIcon.Info);
                 Hide();
             }
             else if (WindowState.Normal == this.WindowState)
             {
-                ni.Visible = false;
+                notifyIcon.Visible = false;
             }
             base.OnStateChanged(e);
         }
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            ni.Visible = false;
+            notifyIcon.Visible = false;
 
             if (media != null)
             {
@@ -186,81 +186,11 @@ namespace WiPapper
             }),IntPtr.Zero );
         }
 
-        private void SelectWall_Click(object sender, RoutedEventArgs e)
-        {
-            var fileDialog = new System.Windows.Forms.OpenFileDialog();
-            fileDialog.Filter = "All files(*.*)|*.*";
+        
 
-            var rezult = fileDialog.ShowDialog();
+        
 
-            switch (rezult)
-            {
-                case System.Windows.Forms.DialogResult.OK:
-                    //file = fileDialog.FileName;
-                    fileMedia = new Uri(fileDialog.FileName);
-                    SetWallpaperButton.IsEnabled = true;
-                    break;
-                case System.Windows.Forms.DialogResult.Cancel:
-                    break;
-                default:
-                    SetWallpaperButton.IsEnabled = false;
-                    break;
-
-            }
-        }
-
-        private void SetWallpaperButton_Click(object sender, RoutedEventArgs e)
-        {
-            FindWorkerWindow();
-
-            //if (media != null)
-            if (currentlyPlaying == true)
-            {
-                UnSetWall();
-            }
-
-            for (int i = 0; i < windowList.Count; i++) // можно цикл убрать и сделать для 1 монитора иначе потом для не 1го монитора надо асинхронность
-            {
-                //Window window = new Window(); //сделать одно окно
-
-                windowList[i] = new Window();
-
-                windowList[i].WindowStyle = WindowStyle.None;
-                windowList[i].AllowsTransparency = true;
-
-                windowList[i].Top = ScreenList[i].Top;
-                windowList[i].Left = ScreenList[i].Left;
-                windowList[i].Width = ScreenList[i].Width;
-                windowList[i].Height = ScreenList[i].Height;
-
-                windowList[i].Initialized += new EventHandler((s, ea) => // тут надо зарефакторить media- это для медиа, а для html надо cefsharp 
-                {
-                    if (fileMedia.AbsolutePath.Contains("index.html"))
-                    {
-                        //метод 1 - (сделать проверки для всякого (например нужно ли запись включать и тд (проверить что будет если не обявить функцию (то есть код будет проверять какие функции есть в обоях при ошибке = false, значит метод не будет работать)))+ можно асинхронность но потом под конец(сначала главное чтобы работало))
-                        SetHtmlWallpaper.FilePath = Path.GetDirectoryName(fileMedia.LocalPath);
-                        SetHtmlWallpaper.SetBrowserAsWallpaper(windowList[i]);
-                        
-                        currentlyPlaying = true;
-                    }
-                    else
-                    {
-                        //метод 2-в него то что ниже
-                        SetMediaAsWallpaper2(windowList[i]);
-
-                        currentlyPlaying = true;
-                    }
-
-                    HWND windowHandle = new WindowInteropHelper(windowList[i]).Handle;
-                    User32.SetParent(windowHandle, workerw);
-                });
-                windowList[i].UpdateLayout();
-                windowList[i].Show();
-                WallpaperStretchTypeComboBox_SelectionChanged(null, null);
-            }
-        }
-
-        private void SetMediaAsWallpaper2(Window windowList)
+        private void SetMediaAsWallpaper(Window windowList)
         {
             media = new MediaElement();
             Grid grid = new Grid();
@@ -280,16 +210,9 @@ namespace WiPapper
             currentlyPlaying = true;
         }
 
-        private void WallpaperStretchTypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (!WindowInitialized || media == null) return;
-            media.Stretch = (Stretch)WallpaperStretchTypeComboBox.SelectedIndex;
-        }
 
-        private void UnSetWallpaper_Click(object sender, RoutedEventArgs e)
-        {
-            UnSetWall();
-        }
+
+
 
         private void UnSetWall()
         {
@@ -306,11 +229,6 @@ namespace WiPapper
             }
         }
 
-        private void Volume_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (currentlyPlaying == true)
-                media.Volume = Volume.Value;
-        }
 
 
 
@@ -335,66 +253,68 @@ namespace WiPapper
 
 
 
-        #region TaskBarInitializations(бля кароче заебался завтра)
-        private void PopulateComboBoxes() //Этот метод PopulateComboBoxes() служит для заполнения элемента управления ComboBox (в данном случае, AccentStateComboBox) значениями перечисления AccentState
-        {
-            // разобраться
-            AccentComboBox.ItemsSource = Enum.GetValues(typeof(AccentState)).Cast<AccentState>();
-            AccentComboBox.SelectedIndex = 0;
-            FakeAccentComboBox.SelectedIndex = 0;
 
-            //ChooseAFitComboBox.SelectedIndex = 0;
-        }
+        #region TaskBarInitializations настройки и вся фигня с ними
 
         private void LoadSettings() //Этот метод позволяет загрузить сохраненные настройки и отразить их в интерфейсе вашего приложения, чтобы пользователь мог видеть текущие значения настроек.
-        {
-            TaskBarOptions.InitializeOptions();
+        {//ну лучше оставить его тут
+            OptionsManager.InitializeOptions();
 
             SwitchTaskbarBeingEdited("Main");
 
-            SetWallpapperWhenLaunchedCheckBox.IsChecked = TaskBarOptions.Options.Settings.SetWallpapperWhenLaunched;
-            StartMinimizedCheckBox.IsChecked = TaskBarOptions.Options.Settings.StartMinimized;
-            StartWhenLaunchedCheckBox.IsChecked = TaskBarOptions.Options.Settings.StartWhenLaunched;
-            UseMaximizedSettingsCheckBox.IsChecked = TaskBarOptions.Options.Settings.UseDifferentSettingsWhenMaximized;
-            StartWithWindowsCheckBox.IsChecked = TaskBarOptions.Options.Settings.StartWhenLaunched;
+            SetWallpapperWhenLaunchedCheckBox.IsChecked = OptionsManager.Options.SetWallpapperWhenLaunched;
+            StartMinimizedCheckBox.IsChecked = OptionsManager.Options.StartMinimized;
+            StartWhenLaunchedCheckBox.IsChecked = OptionsManager.Options.StartWhenLaunched;
+            UseMaximizedSettingsCheckBox.IsChecked = OptionsManager.Options.UseDifferentSettingsWhenMaximized;
+            StartWithWindowsCheckBox.IsChecked = OptionsManager.Options.StartWithWindows;
 
             try
             {
-                fileMedia = new Uri(TaskBarOptions.Options.WallpapperPath);
+                fileMedia = new Uri(OptionsManager.Options.Settings.WallpapperPath);
             }
-            catch { }
+            catch
+            {
+                
+            } //что то сделать
         }
 
-        private void SaveSettings() // Метод для сохранения настроек
+        private void SaveSettings() // Метод для сохранения настроек  //тут сохраняются настройки приложения поэтому надо перенести место сохранения (сохранять не в TaskBarOptions) или переименовать TaskBarOptions тк там все сохраняется или хуй знает
         {
-            TaskBarOptions.Options.WallpapperPath = fileMedia?.ToString();
-            TaskBarOptions.Options.Settings.ChooseAFitComboBoxIndex = (byte)WallpaperStretchTypeComboBox.SelectedIndex;
-            TaskBarOptions.Options.Settings.MainTaskbarStyle.AccentState = (byte)((int)AccentComboBox.SelectedItem);
-            TaskBarOptions.Options.Settings.MainTaskbarStyle.GradientColor = ColorPicker.SelectedColor.ToString();
-            TaskBarOptions.Options.Settings.MainTaskbarStyle.WindowsAccentAlpha = (byte)AccentAlphaSlider.Value;
-            TaskBarOptions.Options.Settings.MainTaskbarStyle.Colorize = ColorizeCB.IsChecked ?? false;
-            TaskBarOptions.Options.Settings.MainTaskbarStyle.UseWindowsAccentColor = WindowsAccentColorCheckBox.IsChecked ?? false;
+            OptionsManager.Options.Settings.WallpapperPath = fileMedia?.ToString();
+            OptionsManager.Options.ChooseAFitComboBoxIndex = (byte)WallpaperStretchTypeComboBox.SelectedIndex;
 
-            TaskBarOptions.Options.Settings.SetWallpapperWhenLaunched = SetWallpapperWhenLaunchedCheckBox.IsChecked ?? false; //зачет тут false ?
-            TaskBarOptions.Options.Settings.UseDifferentSettingsWhenMaximized = UseMaximizedSettingsCheckBox.IsChecked ?? false;
-            TaskBarOptions.Options.Settings.StartMinimized = StartMinimizedCheckBox.IsChecked ?? false;
-            TaskBarOptions.Options.Settings.StartWhenLaunched = StartWhenLaunchedCheckBox.IsChecked ?? false;
+            OptionsManager.Options.StartMinimized = StartMinimizedCheckBox.IsChecked ?? false;
+            OptionsManager.Options.SetWallpapperWhenLaunched = SetWallpapperWhenLaunchedCheckBox.IsChecked ?? false;
+            OptionsManager.Options.StartWhenLaunched = StartWhenLaunchedCheckBox.IsChecked ?? false;
+            //OptionsManager.Options.UseDifferentSettingsWhenMaximized = UseMaximizedSettingsCheckBox.IsChecked ?? false; //по факту не нужны но для красоты сделать?
+            //OptionsManager.Options.StartWithWindows = StartWithWindowsCheckBox.IsChecked ?? false;
 
-            TaskBarOptions.SaveOptions();
+            OptionsManager.SerializeOptions();
         }
 
         private void Window_ContentRendered(object sender, EventArgs e) //7  Общая цель этого метода - инициализировать ваше окно и выполнить необходимые действия после его отображения, включая загрузку настроек, установку начального состояния окна и настройку прослушивания событий.
         {
             // Заполнение ComboBox, загрузка настроек и установка начального состояния окна
-            PopulateComboBoxes();
             LoadSettings();
             WindowInitialized = true;
 
-            if (TaskBarOptions.Options.Settings.StartMinimized) { this.WindowState = WindowState.Minimized; }
-            if (TaskBarOptions.Options.Settings.StartWhenLaunched) { StartStopButton_Click(null, null); }
-            if (TaskBarOptions.Options.Settings.SetWallpapperWhenLaunched) { SetWallpaperButton_Click(null, null); SetWallpaperButton.IsEnabled = true; }
+            if (OptionsManager.Options.StartMinimized)
+            {
+                this.WindowState = WindowState.Minimized;
+            }
 
-            WallpaperStretchTypeComboBox.SelectedIndex = TaskBarOptions.Options.Settings.ChooseAFitComboBoxIndex;
+            if (OptionsManager.Options.StartWhenLaunched)
+            {
+                StartStopButton_Click(null, null);
+            }
+
+            if (OptionsManager.Options.SetWallpapperWhenLaunched) 
+            {
+                SetWallpaperButton.IsEnabled = true;
+                SetWallpaperButton_Click(null, null);
+            }
+
+            WallpaperStretchTypeComboBox.SelectedIndex = OptionsManager.Options.ChooseAFitComboBoxIndex;
 
             // Listen for name change changes across all processes/threads on current desktop
             // Установка хука для отслеживания изменения состояния окна
@@ -406,7 +326,7 @@ namespace WiPapper
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             //SysTrayIcon.Dispose();    // Освобождение ресурсов, связанных с иконкой системного трея
-            ni.Dispose();
+            notifyIcon.Dispose();
             SaveSettings();
             RunApplyTask = false; // Остановка задачи ApplyTask
             User32.UnhookWinEvent(WindowStateHook); // Отключение хука для отслеживания изменения состояния окна
@@ -422,7 +342,7 @@ namespace WiPapper
         #endregion Destructors
 
         #region Functions (по названию можно куда то убрать)
-        private void ApplyToAllTaskbars()
+        private void ApplyToAllTaskbars() // панель задач одна так что хз проверить с 2 мониками
         {
             Taskbars.Bars = new List<Taskbar>();
 
@@ -538,7 +458,7 @@ namespace WiPapper
 
         private void UpdateAllSettings() // Обновление всех настроек, включая акцент, цвет, флаги и пр.
         {
-            SetAccentState((AccentState)AccentComboBox.SelectedItem);
+            SetAccentState(AccentComboBox.SelectedIndex);
             SetTaskbarColor(ColorPicker.SelectedColor ?? System.Windows.Media.Color.FromArgb(255, 255, 255, 255));
             SetAccentFlags(ColorizeCB.IsChecked ?? false);
             WindowsAccentColorCheckBox_Changed(null, null);
@@ -568,25 +488,129 @@ namespace WiPapper
             // Отображение настроек выбранной панели задачи в интерфейсе приложения
             if (tb == "Main")
             {
-                AccentComboBox.SelectedItem = (AccentState)TaskBarOptions.Options.Settings.MainTaskbarStyle.AccentState;
-                ColorPicker.SelectedColor = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(TaskBarOptions.Options.Settings.MainTaskbarStyle.GradientColor);
-                AccentAlphaSlider.Value = TaskBarOptions.Options.Settings.MainTaskbarStyle.WindowsAccentAlpha;
-                ColorizeCB.IsChecked = TaskBarOptions.Options.Settings.MainTaskbarStyle.Colorize;
-                WindowsAccentColorCheckBox.IsChecked = TaskBarOptions.Options.Settings.MainTaskbarStyle.UseWindowsAccentColor;
+                AccentComboBox.SelectedIndex = OptionsManager.Options.Settings.MainTaskbarStyle.AccentState;
+                ColorPicker.SelectedColor = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(OptionsManager.Options.Settings.MainTaskbarStyle.GradientColor);
+                AccentAlphaSlider.Value = OptionsManager.Options.Settings.MainTaskbarStyle.WindowsAccentAlpha;
+                ColorizeCB.IsChecked = OptionsManager.Options.Settings.MainTaskbarStyle.Colorize;
+                WindowsAccentColorCheckBox.IsChecked = OptionsManager.Options.Settings.MainTaskbarStyle.UseWindowsAccentColor;
             }
             else if (tb == "Maximized")
             {
-                AccentComboBox.SelectedItem = (AccentState)TaskBarOptions.Options.Settings.MaximizedTaskbarStyle.AccentState;
-                ColorPicker.SelectedColor = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(TaskBarOptions.Options.Settings.MaximizedTaskbarStyle.GradientColor);
-                AccentAlphaSlider.Value = TaskBarOptions.Options.Settings.MaximizedTaskbarStyle.WindowsAccentAlpha;
-                ColorizeCB.IsChecked = TaskBarOptions.Options.Settings.MaximizedTaskbarStyle.Colorize;
-                WindowsAccentColorCheckBox.IsChecked = TaskBarOptions.Options.Settings.MaximizedTaskbarStyle.UseWindowsAccentColor;
+                AccentComboBox.SelectedIndex = OptionsManager.Options.Settings.MaximizedTaskbarStyle.AccentState;
+                ColorPicker.SelectedColor = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(OptionsManager.Options.Settings.MaximizedTaskbarStyle.GradientColor);
+                AccentAlphaSlider.Value = OptionsManager.Options.Settings.MaximizedTaskbarStyle.WindowsAccentAlpha;
+                ColorizeCB.IsChecked = OptionsManager.Options.Settings.MaximizedTaskbarStyle.Colorize;
+                WindowsAccentColorCheckBox.IsChecked = OptionsManager.Options.Settings.MaximizedTaskbarStyle.UseWindowsAccentColor;
             }
         }
 
         #endregion Functions
 
-        #region Control Handles( кнопочки и тд можно тут)
+        #region Events( кнопочки и тд можно тут)
+
+        #region Wallpaper Events
+        private void SelectWall_Click(object sender, RoutedEventArgs e)
+        {
+            var fileDialog = new System.Windows.Forms.OpenFileDialog();
+            fileDialog.Filter = "All files(*.*)|*.*";
+
+            var rezult = fileDialog.ShowDialog();
+
+            switch (rezult)
+            {
+                case System.Windows.Forms.DialogResult.OK:
+                    //file = fileDialog.FileName;
+                    fileMedia = new Uri(fileDialog.FileName);
+                    SetWallpaperButton.IsEnabled = true;
+                    break;
+                case System.Windows.Forms.DialogResult.Cancel:
+                    break;
+                default:
+                    SetWallpaperButton.IsEnabled = false;
+                    break;
+
+            }
+        }
+
+        private void SetWallpaperButton_Click(object sender, RoutedEventArgs e)
+        {
+            FindWorkerWindow();
+
+            if (fileMedia == null)
+            {
+                SetWallpaperButton.IsEnabled = false;
+                return;
+            }
+            if (currentlyPlaying == true)
+            {
+                UnSetWall();
+            }
+
+            for (int i = 0; i < windowList.Count; i++) // можно цикл убрать и сделать для 1 монитора иначе потом для не 1го монитора надо асинхронность
+            {
+                //Window window = new Window(); //сделать одно окно
+
+                windowList[i] = new Window();
+
+                windowList[i].WindowStyle = WindowStyle.None;
+                windowList[i].AllowsTransparency = true;
+
+                windowList[i].Top = ScreenList[i].Top;
+                windowList[i].Left = ScreenList[i].Left;
+                windowList[i].Width = ScreenList[i].Width;
+                windowList[i].Height = ScreenList[i].Height;
+
+                windowList[i].Initialized += new EventHandler((s, ea) => // тут надо зарефакторить media- это для медиа, а для html надо cefsharp 
+                {
+                    if (fileMedia.AbsolutePath.Contains("index.html"))
+                    {
+                        //метод 1 - (сделать проверки для всякого (например нужно ли запись включать и тд (проверить что будет если не обявить функцию (то есть код будет проверять какие функции есть в обоях при ошибке = false, значит метод не будет работать)))+ можно асинхронность но потом под конец(сначала главное чтобы работало))
+                        SetHtmlWallpaper.FilePath = Path.GetDirectoryName(fileMedia.LocalPath);
+                        SetHtmlWallpaper.SetBrowserAsWallpaper(windowList[i]);
+
+                        currentlyPlaying = true;
+                    }
+                    else
+                    {
+                        //метод 2-в него то что ниже
+                        SetMediaAsWallpaper(windowList[i]);
+
+                        currentlyPlaying = true;
+                    }
+
+                    HWND windowHandle = new WindowInteropHelper(windowList[i]).Handle;
+                    User32.SetParent(windowHandle, workerw);
+                });
+                windowList[i].UpdateLayout();
+                windowList[i].Show();
+                WallpaperStretchTypeComboBox_SelectionChanged(null, null);
+            }
+        }
+
+        private void UnSetWallpaper_Click(object sender, RoutedEventArgs e)
+        {
+            UnSetWall();
+        }
+
+        private void Volume_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (currentlyPlaying == true)
+                media.Volume = Volume.Value;
+        }
+
+        private void WallpaperStretchTypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!WindowInitialized || media == null) return;
+            media.Stretch = (Stretch)WallpaperStretchTypeComboBox.SelectedIndex;
+        }
+
+
+        #endregion
+
+        #region TaskBar Events
+
+
+        #endregion
         private void StartStopButton_Click(object sender, RoutedEventArgs e) // Обработчик события нажатия кнопки Start/Stop
         {
             if (RunApplyTask)
@@ -604,16 +628,10 @@ namespace WiPapper
             }
         }
 
-        private void FakeAccentComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e) //Общая цель этого обработчика события - реагировать на изменение выбранного элемента в AccentStateComboBox и выполнить какие-либо действия на основе этого изменения, возможно, изменить параметры приложения связанные с AccentState.
+        private void AccentComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e) //Общая цель этого обработчика события - реагировать на изменение выбранного элемента в AccentStateComboBox и выполнить какие-либо действия на основе этого изменения, возможно, изменить параметры приложения связанные с AccentState.
         {   // Обработчик события изменения выбранного элемента в AccentStateComboBox
             if (!WindowInitialized) return;
-            AccentComboBox.SelectedIndex = FakeAccentComboBox.SelectedIndex;
-            SetAccentState((AccentState)AccentComboBox.SelectedItem);
-        }
-
-        private void AccentComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {           
-            FakeAccentComboBox.SelectedIndex = AccentComboBox.SelectedIndex;
+            SetAccentState(AccentComboBox.SelectedIndex);
         }
 
         private void ColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<System.Windows.Media.Color?> e)
@@ -651,10 +669,10 @@ namespace WiPapper
             //GradientColorPicker.IsEnabled = !use;
         }
 
-        private void UseMaximizedSettingsCheckBox_Changed(object sender, RoutedEventArgs e)
+        private void UseMaximizedSettingsCheckBox_Changed(object sender, RoutedEventArgs e) //
         {   // Обработчик события изменения состояния флажка UseMaximizedSettingsCheckBox
             if (!WindowInitialized) return;
-            TaskBarOptions.Options.Settings.UseDifferentSettingsWhenMaximized = UseMaximizedSettingsCheckBox.IsChecked ?? false;
+            OptionsManager.Options.UseDifferentSettingsWhenMaximized = UseMaximizedSettingsCheckBox.IsChecked ?? false;
             Taskbars.UpdateAllSettings();
         }
 
@@ -682,16 +700,16 @@ namespace WiPapper
         {
             if (!WindowInitialized) return;
 
-            TaskBarOptions.Options.Settings.StartWithWindows = StartWithWindowsCheckBox.IsChecked ?? false;
+            OptionsManager.Options.StartWithWindows = StartWithWindowsCheckBox.IsChecked ?? false;
 
             try
             {
-                if (TaskBarOptions.Options.Settings.StartWithWindows) { rkApp.SetValue("WiPapper", $"\"{MyPath}\""); }
+                if (OptionsManager.Options.StartWithWindows) { rkApp.SetValue("WiPapper", $"\"{MyPath}\""); }
                 else { rkApp.DeleteValue("WiPapper", false); }
             }
             catch (Exception ex)
             {
-                System.Windows.Forms.MessageBox.Show(ex.Message, "Failed to Set Registry Key");  //исправить на русский
+                System.Windows.MessageBox.Show(ex.Message, "Failed to Set Registry Key");  //исправить на русский
             }
         }
 

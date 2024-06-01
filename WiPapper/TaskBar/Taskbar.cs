@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Vanara.PInvoke;
+using WiPapper.AppOptions;
 
 namespace WiPapper
 {
@@ -81,7 +82,7 @@ namespace WiPapper
         {
             foreach (Taskbar tb in Bars) //Итерация по списку панелей задач.
             {
-                if (tb.HasMaximizedWindow && TaskBarOptions.Options.Settings.UseDifferentSettingsWhenMaximized) { tbType = "Maximized"; }//Определение типа панели задачи (tbType) в зависимости от наличия максимизированных окон и настроек пользователя.
+                if (tb.HasMaximizedWindow && OptionsManager.Options.UseDifferentSettingsWhenMaximized) { tbType = "Maximized"; }//Определение типа панели задачи (tbType) в зависимости от наличия максимизированных окон и настроек пользователя.
                 else { tbType = "Main"; }
 
                 tb.AccentPolicy.AccentState = Globals.GetAccentState(tbType); //Установка свойства AccentState для каждой панели задачи.
@@ -94,7 +95,7 @@ namespace WiPapper
         {
             foreach (Taskbar tb in Bars)
             {
-                if (tb.HasMaximizedWindow && TaskBarOptions.Options.Settings.UseDifferentSettingsWhenMaximized) { tbType = "Maximized"; }
+                if (tb.HasMaximizedWindow && OptionsManager.Options.UseDifferentSettingsWhenMaximized) { tbType = "Maximized"; }
                 else { tbType = "Main"; }
 
                 tb.AccentPolicy.AccentState = Globals.GetAccentState(tbType);
@@ -105,7 +106,7 @@ namespace WiPapper
         {
             foreach (Taskbar tb in Bars)
             {
-                if (tb.HasMaximizedWindow && TaskBarOptions.Options.Settings.UseDifferentSettingsWhenMaximized) { tbType = "Maximized"; }
+                if (tb.HasMaximizedWindow && OptionsManager.Options.UseDifferentSettingsWhenMaximized) { tbType = "Maximized"; }
                 else { tbType = "Main"; }
 
                 tb.AccentPolicy.AccentFlags = Globals.GetAccentFlags(tbType);
@@ -116,7 +117,7 @@ namespace WiPapper
         {
             foreach (Taskbar tb in Bars)
             {
-                if (tb.HasMaximizedWindow && TaskBarOptions.Options.Settings.UseDifferentSettingsWhenMaximized) { tbType = "Maximized"; }
+                if (tb.HasMaximizedWindow && OptionsManager.Options.UseDifferentSettingsWhenMaximized) { tbType = "Maximized"; }
                 else { tbType = "Main"; }
 
                 tb.AccentPolicy.GradientColor = Globals.GetTaskbarColor(tbType);

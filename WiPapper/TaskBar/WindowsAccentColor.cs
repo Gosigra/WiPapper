@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Media;
+using WiPapper.AppOptions;
 
 namespace WiPapper
 {
@@ -11,7 +12,7 @@ namespace WiPapper
         {
             UpdateColor();
 
-            return BitConverter.ToInt32(new byte[] { accentColor.R, accentColor.G, accentColor.B, TaskBarOptions.Options.Settings.MainTaskbarStyle.WindowsAccentAlpha }, 0);
+            return BitConverter.ToInt32(new byte[] { accentColor.R, accentColor.G, accentColor.B, OptionsManager.Options.Settings.MainTaskbarStyle.WindowsAccentAlpha }, 0);
         }
 
         private static void UpdateColor()

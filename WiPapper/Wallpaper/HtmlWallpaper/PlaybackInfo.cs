@@ -9,15 +9,15 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
     public class PlaybackInfo // пауза 
                               //Не надо наверное так как при 2х медиа сойдет с ума.
     {
-        private string _IsPlaying;
+        private string _isPlaying;
         public string IsPlaying
         {
-            get { return _IsPlaying; }
+            get => _isPlaying;
             set
             {
-                if (_IsPlaying != value)
+                if (_isPlaying != value) //когда одно медиа на паузе а второе играет то приложение покажео второе и можно вызывать чтобы менялось состояние для второго и может с ума не сойдет
                 {
-                    _IsPlaying = value;
+                    _isPlaying = value;
                 }
             }
         }

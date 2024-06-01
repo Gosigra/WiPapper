@@ -8,80 +8,90 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
 {
     public class MediaProperties
     {
-        private string _AlbumArtist;
+        private string _albumArtist;
+
+        private string _albumTitle;
+
+        private int _albumTrackCount;
+
+        private string _artist;
+
+        private string _genres;
+
+        private string _playbackType;
+
+        private string _subtitle;
+
+        private string _thumbnailURL;
+
+        private string _title;
+
+        private int _trackNumber;
+
         public string AlbumArtist
         {
-            get => _AlbumArtist;
-            set => _AlbumArtist = value;
+            get => _albumArtist;
+            set => _albumArtist = value;
         }
 
-        private string _AlbumTitle;
         public string AlbumTitle
         {
-            get => _AlbumTitle;
-            set => _AlbumTitle = value;
+            get => _albumTitle;
+            set => _albumTitle = value;
         }
 
-        private int _AlbumTrackCount;
         public int AlbumTrackCount
         {
-            get => _AlbumTrackCount;
-            set => _AlbumTrackCount = value;
+            get => _albumTrackCount;
+            set => _albumTrackCount = value;
         }
 
-        private string _Artist;
         public string Artist
         {
-            get => _Artist;
-            set => _Artist = value;
+            get => _artist;
+            set => _artist = value;
         }
 
-        private string _Genres;
         public string Genres
         {
-            get => _Genres;
-            set => _Genres = value;
+            get => _genres;
+            set => _genres = value;
         }
 
-        private string _PlaybackType;
         public string PlaybackType
         {
-            get => _PlaybackType;
-            set => _PlaybackType = value;
+            get => _playbackType;
+            set => _playbackType = value;
         }
 
-        private string _Subtitle;
         public string Subtitle
         {
-            get => _Subtitle;
-            set => _Subtitle = value;
+            get => _subtitle;
+            set => _subtitle = value;
         }
 
-        private string _ThumbnailURL;
         public string ThumbnailURL // изменить, не забыть
         {
-            get { return _ThumbnailURL; }
+            get { return _thumbnailURL; }
             set
             {
                 //if (value != _ThumbnailURL)
                 //{
-                _ThumbnailURL = value;
+                _thumbnailURL = value;
                 //}
             }
         }
 
-        private string _Title;
         public string Title
         {
-            get => _Title;
-            set => _Title = value;
+            get => _title;
+            set => _title = value;
         }
 
-        private int _TrackNumber;
         public int TrackNumber
         {
-            get => _TrackNumber;
-            set => _TrackNumber = value;
+            get => _trackNumber;
+            set => _trackNumber = value;
         }
     }
 }

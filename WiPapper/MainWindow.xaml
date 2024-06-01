@@ -50,7 +50,7 @@
                     <!--<TextBox x:Name="PathToWall" Grid.Column="3" Grid.Row="3" Width="150" Height="25"/>-->
                     <Button x:Name="SelectWall" Content="Выбрать обои" Grid.Column="3" Grid.Row="3" Grid.ColumnSpan="2" Width="150" Height="25" Click="SelectWall_Click"/>
                     <Button x:Name="SetWallpaperButton" Content="Установить" Grid.Column="3" Grid.Row="4" Width="100" Height="20" Margin="5" FontSize="9" Click="SetWallpaperButton_Click" IsEnabled="False"/>
-                    <Button x:Name="UnSetWallpaper" Content="Убрать" Grid.Column="4" Grid.Row="4" Width="100" Height="20" Margin="5" FontSize="9" Click="UnSetWallpaper_Click"/>
+                    <Button x:Name="UnSetWallpaper" Content="Убрать" Grid.Column="4" Grid.Row="4" Width="100" Height="20" Margin="5" FontSize="9" Click="UnSetWallpaper_Click" IsEnabled="{Binding ElementName=SetWallpaperButton, Path=IsEnabled}"/>
 
                     <TextBlock Grid.Column="3" Grid.Row="6" Text="Звук" Margin="5"/>
                     <Slider x:Name="Volume" Grid.Column="3" Grid.Row="7" Grid.ColumnSpan="2" ValueChanged="Volume_ValueChanged"/>
@@ -91,15 +91,14 @@
                     </Grid.RowDefinitions>
 
                     <TextBlock Text="Акцент" Margin="5 0 0 0" Grid.Row="1"  Grid.Column="1"/>
-                    <ComboBox x:Name="FakeAccentComboBox" Margin="3 0 5 2" Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" SelectionChanged="FakeAccentComboBox_SelectionChanged" >
+                    <ComboBox x:Name="AccentComboBox" Margin="3 0 5 2" Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" SelectionChanged="AccentComboBox_SelectionChanged" >
                         <ComboBoxItem>Отключить</ComboBoxItem>
                         <ComboBoxItem>Градиент</ComboBoxItem>
                         <ComboBoxItem>Прозрачный градиент</ComboBoxItem>
                         <ComboBoxItem>Размытие</ComboBoxItem>
                         <ComboBoxItem>Альтернативное размытие</ComboBoxItem>
                     </ComboBox>
-                    <ComboBox x:Name="AccentComboBox" Visibility="Collapsed" Margin="3 30 5 2" Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" SelectionChanged="AccentComboBox_SelectionChanged"/>
-
+                    
 
                     <TextBlock Text="Цвет" Margin="5" Grid.Row="2"  Grid.Column="1"/>
                     <xctk:ColorPicker x:Name="ColorPicker" Margin="0 0 0 4" Width="30" Height="22" ColorMode="ColorCanvas" ShowDropDownButton="False" ShowTabHeaders="False" Grid.Row="2" Grid.Column="2" SelectedColorChanged="ColorPicker_SelectedColorChanged" />
