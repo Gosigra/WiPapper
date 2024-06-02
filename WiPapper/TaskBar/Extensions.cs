@@ -55,7 +55,6 @@ namespace Extensions
     }
     #endregion
 
-
     public static class SWCA
     {
         [DllImport("user32.dll", SetLastError = true)]

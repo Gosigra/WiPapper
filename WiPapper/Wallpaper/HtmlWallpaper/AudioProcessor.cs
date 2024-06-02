@@ -1,23 +1,10 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
-using System.Net;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Media.Imaging;
-using System.Net.WebSockets;
-using System.Threading;
 using System.Numerics;
 using CefSharp;
 using CefSharp.Wpf;
-using Windows.Media.Control;
-using Windows.Storage.Streams;
 using NAudio.Wave;
-using System.Text.Json;
-using System.Windows.Controls;
-using System.Windows.Interop;
-using Vanara.PInvoke;
-using System.Text.RegularExpressions;
 
 namespace WiPapper.Wallpaper.HtmlWallpaper
 {
@@ -108,7 +95,6 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
 
         public static double[] GetSpectrum(double[] leftChannel, double[] rightChannel)
         {
-            double[] spectrumData;
             var window = new FftSharp.Windows.Hanning();
 
             // Обработка левого канала
@@ -129,14 +115,12 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
                     FftSharp.FFT.Power(rightSpectrum) :
                     FftSharp.FFT.Magnitude(rightSpectrum);
 
-                spectrumData = leftChannelSpectrum.Concat(rightChannelSpectrum).ToArray();
+                return leftChannelSpectrum.Concat(rightChannelSpectrum).ToArray();
             }
             else
             {
-                spectrumData = leftChannelSpectrum;
+                return leftChannelSpectrum;
             }
-
-            return spectrumData;
         }
 
         private static double[] ApplySpectrumFilter(double[] spectrumData)
@@ -155,8 +139,17 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
         private static void SendAudioData(double[] spectrumData)
         {
             //string jsonAudioData2 = JsonConvert.SerializeObject(spectrumData);
-            string jsonAudioData2 = System.Text.Json.JsonSerializer.Serialize(spectrumData);
-            SetHtmlWallpaper.Browser.ExecuteScriptAsync("wallpaperAudioListener", jsonAudioData2);
+            string jsonAudioData = System.Text.Json.JsonSerializer.Serialize(spectrumData);
+            //SetHtmlWallpaper.Browser.ExecuteScriptAsync("wallpaperAudioListener", jsonAudioData);
+
+            for (int i = 0; i < MainWindow.windowList.Count; i++)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    ChromiumWebBrowser browser = MainWindow.windowList[i].Content as ChromiumWebBrowser;
+                    browser.ExecuteScriptAsync("wallpaperAudioListener", jsonAudioData);
+                });
+            }
         }
     }
 }

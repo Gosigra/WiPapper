@@ -17,7 +17,7 @@ namespace WiPapper
 
         private static void UpdateColor()
         {
-            string keyName = "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Accent";
+            const string keyName = "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Accent";
             int keyColor = (int)Microsoft.Win32.Registry.GetValue(keyName, "StartColorMenu", 00000000);
 
             byte[] bytes = BitConverter.GetBytes(keyColor);

@@ -1,24 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Forms;
 using System.ComponentModel;
 using System.Drawing;
 using System.IO;
-using Vanara.PInvoke;
 using System.Windows.Interop;
-using static WiPapper.Globals;
-using Extensions;
-using Microsoft.Win32;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using Vanara.PInvoke;
+using Microsoft.Win32;
+using static WiPapper.Globals;
 using WiPapper.Wallpaper.HtmlWallpaper;
 using WiPapper.AppOptions;
 
@@ -34,33 +30,32 @@ namespace WiPapper
     /// </summary>
     public partial class MainWindow : Window
     {
-        //public static string file; //
-        public static Uri fileMedia;
-        //public static Window win2;  //не используется вроде
-        public static MediaElement media = null;
-                
-        public static List<Window> windowList;
+        // Start with Windows registry key
+        // Реестровый ключ для запуска с Windows
+        readonly RegistryKey rkApp = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true); //Registry.CurrentUser = HKEY_CURRENT_USER
+        NotifyIcon notifyIcon;
+
+        #region wlp
         public static List<Rectangle> ScreenList;
+        public static List<Window> windowList;
+        public static List<MediaElement> mediaList;
 
         public static HWND workerw;
-        //public static HWND workerwHidden; //
 
-        //public static MediaPlayer player; //
+        public static Uri fileMedia;
 
-        //public static bool soundOrNot = false; //
         public static bool currentlyPlaying = false;
+        #endregion
 
-
-        #region Declarations
+        #region Declarations TB
         // Main window initialization 
         bool WindowInitialized = false;  // Флаг инициализации окна
-        string MyPath = Assembly.GetExecutingAssembly().Location;       // Путь к исполняемому файлу
+        readonly string MyPath = Assembly.GetExecutingAssembly().Location;       // Путь к исполняемому файлу
 
         // Taskbars // Объявление задачи ApplyTask и флага RunApplyTask
         static Task ApplyTask;
         static bool RunApplyTask = false;
         public static bool FindTaskbarHandles = true;
-
 
         private static bool alphaDragStarted = false;
 
@@ -70,37 +65,21 @@ namespace WiPapper
 
         // Window state hook 
         // Хук для отслеживания изменения состояния окна
-        private static User32.WinEventProc procDelegate = new User32.WinEventProc(WinEventProc);
+        private static readonly User32.WinEventProc procDelegate = new User32.WinEventProc(WinEventProc);
         private static User32.HWINEVENTHOOK WindowStateHook;
         private static HWND LastClosedWindow;
         private static DateTime LastClosedWindowTime;
-
-        // Start with Windows registry key
-        // Реестровый ключ для запуска с Windows
-        RegistryKey rkApp = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true); //     Registry.CurrentUser = HKEY_CURRENT_USER
-
         #endregion Declarations
-
-
-        NotifyIcon notifyIcon;
 
         public MainWindow()
         {
             InitializeComponent();
 
+            FillLists();
+
+            InitializeNotifyIcon();
+
             SetHtmlWallpaper.StartHttpListener();
-
-
-            notifyIcon = new NotifyIcon();                                                                                                     // Инициализация иконки системного трея
-            Stream iconStream = System.Windows.Application.GetResourceStream(new Uri("Resources/1.ico", UriKind.Relative)).Stream;
-            notifyIcon.Icon = new Icon(iconStream);
-            notifyIcon.Click += (object sender, EventArgs args) =>
-            {
-                this.Show();
-                this.WindowState = WindowState.Normal;
-            };
-
-
             /*
             * Check monitor numbers and put them in differents Arraylist  
             * // проверка кол-ва мониторов и помещение в разные массивы
@@ -115,20 +94,39 @@ namespace WiPapper
             * //ButtonList будет использоваться для динамического создания кнопки для выбора и загрузки файла для каждого монитора *Пока не реализовано*
             */
 
-            windowList = new List<Window>();
+        }
+
+        private void FillLists()
+        {
             ScreenList = new List<Rectangle>();
-            for (int i = 0; i < Screen.AllScreens.Length; i++)
+            windowList = new List<Window>();
+            mediaList = new List<MediaElement>();
+
+            foreach (var item in Screen.AllScreens)
             {
-                ScreenList.Add(Screen.AllScreens[i].Bounds);                                                                                                 //получаю рабочий стол и его рабочую область ({X = 0 Y = 0 Width = 1920 Height = 1040}) //working area
+                ScreenList.Add(item.Bounds);                                                                                                 //получаю рабочий стол и его рабочую область ({X = 0 Y = 0 Width = 1920 Height = 1040}) //working area
             }
 
             for (int i = 0; i < ScreenList.Count; i++)
             {
                 windowList.Add(new Window());                                                                                                                //здесь кол-во экранов
+                mediaList.Add(new MediaElement());
             }
         }
 
-        protected override void OnStateChanged(EventArgs e)
+        private void InitializeNotifyIcon()
+        {
+            notifyIcon = new NotifyIcon();                                                                                                     // Инициализация иконки системного трея
+            Stream iconStream = System.Windows.Application.GetResourceStream(new Uri("Resources/1.ico", UriKind.Relative)).Stream;
+            notifyIcon.Icon = new Icon(iconStream);
+            notifyIcon.Click += (object sender, EventArgs args) =>
+            {
+                this.Show();
+                this.WindowState = WindowState.Normal;
+            };
+        }
+
+        protected override void OnStateChanged(EventArgs e) // Уведомление о сворачивании
         {
             if(WindowState == WindowState.Minimized)
             {
@@ -146,118 +144,8 @@ namespace WiPapper
             base.OnStateChanged(e);
         }
 
-        protected override void OnClosing(CancelEventArgs e)
-        {
-            notifyIcon.Visible = false;
-
-            if (media != null)
-            {
-                media.Stop();
-                media = null;
-                for (int i = 0; i < windowList.Count; i++)
-                {
-                    windowList[i].Close();
-                }
-            }
-            
-            base.OnClosing(e);
-        }
-
-        public static void FindWorkerWindow()
-        {
-            HWND progMan = User32.FindWindow("ProgMan", null);
-
-            IntPtr result = IntPtr.Zero;
-
-            User32.SendMessageTimeout(progMan, 0x052C, new IntPtr(0), IntPtr.Zero, User32.SMTO.SMTO_NORMAL, 1000, ref result);
-
-            workerw = IntPtr.Zero;
-
-            User32.EnumWindows(new User32.EnumWindowsProc((tophandle, fdhg) =>
-            {
-                HWND p = User32.FindWindowEx(tophandle, IntPtr.Zero, "SHELLDLL_DefView", null);
-
-                if (p != IntPtr.Zero)
-                {
-                    workerw = User32.FindWindowEx(IntPtr.Zero, tophandle, "WorkerW", null);
-                }
-
-                return true;
-            }),IntPtr.Zero );
-        }
-
-        
-
-        
-
-        private void SetMediaAsWallpaper(Window windowList)
-        {
-            media = new MediaElement();
-            Grid grid = new Grid();
-            windowList.Content = grid;
-            grid.Children.Add(media);
-
-            media.Source = fileMedia;
-            media.LoadedBehavior = MediaState.Manual;  //454532542254
-            media.Volume = 0;
-
-            media.MediaEnded += (send, eArgs) =>
-            {
-                media.Position = new TimeSpan(0, 0, 1);
-                media.Play();
-            };
-            media.Play();
-            currentlyPlaying = true;
-        }
-
-
-
-
-
-        private void UnSetWall()
-        {
-            if (currentlyPlaying == true)
-            {
-                media?.Stop();
-                media = null;
-                for (int i = 0; i < windowList.Count; i++)
-                {
-                    windowList[i].Close();
-                }
-
-                currentlyPlaying = false;
-            }
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        #region TaskBarInitializations настройки и вся фигня с ними
-
         private void LoadSettings() //Этот метод позволяет загрузить сохраненные настройки и отразить их в интерфейсе вашего приложения, чтобы пользователь мог видеть текущие значения настроек.
-        {//ну лучше оставить его тут
+        {
             OptionsManager.InitializeOptions();
 
             SwitchTaskbarBeingEdited("Main");
@@ -272,10 +160,7 @@ namespace WiPapper
             {
                 fileMedia = new Uri(OptionsManager.Options.Settings.WallpapperPath);
             }
-            catch
-            {
-                
-            } //что то сделать
+            catch{} //что то сделать
         }
 
         private void SaveSettings() // Метод для сохранения настроек  //тут сохраняются настройки приложения поэтому надо перенести место сохранения (сохранять не в TaskBarOptions) или переименовать TaskBarOptions тк там все сохраняется или хуй знает
@@ -308,7 +193,7 @@ namespace WiPapper
                 StartStopButton_Click(null, null);
             }
 
-            if (OptionsManager.Options.SetWallpapperWhenLaunched) 
+            if (OptionsManager.Options.SetWallpapperWhenLaunched)
             {
                 SetWallpaperButton.IsEnabled = true;
                 SetWallpaperButton_Click(null, null);
@@ -320,9 +205,48 @@ namespace WiPapper
             // Установка хука для отслеживания изменения состояния окна
             WindowStateHook = User32.SetWinEventHook(User32.EventConstants.EVENT_MIN, User32.EventConstants.EVENT_MAX, IntPtr.Zero, procDelegate, 0, 0, User32.WINEVENT.WINEVENT_OUTOFCONTEXT);
         }
-        #endregion Initializations
 
-        #region Destructors
+        private void UseMaximizedSettingsCheckBox_Changed(object sender, RoutedEventArgs e) //
+        {   // Обработчик события изменения состояния флажка UseMaximizedSettingsCheckBox
+            if (!WindowInitialized) return;
+            OptionsManager.Options.UseDifferentSettingsWhenMaximized = UseMaximizedSettingsCheckBox.IsChecked ?? false;
+            Taskbars.UpdateAllSettings();
+        }
+
+        private void StartWithWindowsCheckBox_Changed(object sender, RoutedEventArgs e)
+        {
+            if (!WindowInitialized) return;
+
+            OptionsManager.Options.StartWithWindows = StartWithWindowsCheckBox.IsChecked ?? false;
+
+            try
+            {
+                if (OptionsManager.Options.StartWithWindows) { rkApp.SetValue("WiPapper", $"\"{MyPath}\""); }
+                else { rkApp.DeleteValue("WiPapper", false); }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(ex.Message, "Failed to Set Registry Key");  //исправить на русский
+            }
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            notifyIcon.Visible = false;
+
+            if (mediaList != null)
+            {
+                //media[i].Stop();
+                //mediaList = null;
+                foreach (Window window in windowList)
+                {
+                    window.Close();
+                }
+            }
+
+            base.OnClosing(e);
+        }
+
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             //SysTrayIcon.Dispose();    // Освобождение ресурсов, связанных с иконкой системного трея
@@ -339,9 +263,172 @@ namespace WiPapper
         {
             Environment.Exit(0);
         }
-        #endregion Destructors
 
-        #region Functions (по названию можно куда то убрать)
+        #region Wallpaper
+        private void SetMediaAsWallpaper(Window windowList, int i)
+        {
+            mediaList[i] = new MediaElement();
+            Grid grid = new Grid();
+            windowList.Content = grid;
+            grid.Children.Add(mediaList[i]);
+
+            mediaList[i].Source = fileMedia;
+            mediaList[i].LoadedBehavior = MediaState.Manual;  //454532542254
+            mediaList[i].Volume = 0;
+
+            mediaList[i].MediaEnded += (send, eArgs) =>
+            {
+                mediaList[i].Position = new TimeSpan(0, 0, 1);
+                mediaList[i].Play();
+            };
+            mediaList[i].Play();
+            currentlyPlaying = true;
+        }
+
+        private void UnSetWall()
+        {
+            if (currentlyPlaying)
+            {
+                //media?.Stop();
+                //mediaList = null;
+                foreach (Window window in windowList)
+                {
+                    window.Close();
+                }
+
+                currentlyPlaying = false;
+            }
+        }
+
+        public static void FindWorkerWindow()
+        {
+            HWND progMan = User32.FindWindow("ProgMan", null);
+
+            IntPtr result = IntPtr.Zero;
+
+            User32.SendMessageTimeout(progMan, 0x052C, new IntPtr(0), IntPtr.Zero, User32.SMTO.SMTO_NORMAL, 1000, ref result);
+
+            workerw = IntPtr.Zero;
+
+            User32.EnumWindows(new User32.EnumWindowsProc((tophandle, intPtr) =>
+            {
+                HWND p = User32.FindWindowEx(tophandle, IntPtr.Zero, "SHELLDLL_DefView", null);
+
+                if (p != IntPtr.Zero)
+                {
+                    workerw = User32.FindWindowEx(IntPtr.Zero, tophandle, "WorkerW", null);
+                }
+
+                return true;
+            }), IntPtr.Zero);
+        }
+
+        #region Events
+        private void SelectWall_Click(object sender, RoutedEventArgs e)
+        {
+            System.Windows.Forms.OpenFileDialog fileDialog = null;
+            fileDialog.Filter = "All files(*.*)|*.*";
+
+            var rezult = fileDialog.ShowDialog();
+
+            switch (rezult)
+            {
+                case System.Windows.Forms.DialogResult.OK:
+                    //file = fileDialog.FileName;
+                    fileMedia = new Uri(fileDialog.FileName);
+                    SetWallpaperButton.IsEnabled = true;
+                    break;
+                case System.Windows.Forms.DialogResult.Cancel:
+                    break;
+                default:
+                    SetWallpaperButton.IsEnabled = false;
+                    break;
+
+            }
+        }
+
+        private void SetWallpaperButton_Click(object sender, RoutedEventArgs e)
+        {
+            FindWorkerWindow();
+
+            if (fileMedia == null)
+            {
+                SetWallpaperButton.IsEnabled = false;
+                return;
+            }
+            if (currentlyPlaying)
+            {
+                UnSetWall();
+            }
+
+            for (int i = 0; i < windowList.Count; i++) // можно цикл убрать и сделать для 1 монитора иначе потом для не 1го монитора надо асинхронность
+            {
+                //Window window = new Window(); //сделать одно окно
+
+                windowList[i] = new Window
+                {
+                    WindowStyle = WindowStyle.None,
+                    AllowsTransparency = true,
+
+                    Top = ScreenList[i].Top,
+                    Left = ScreenList[i].Left,
+                    Width = ScreenList[i].Width,
+                    Height = ScreenList[i].Height
+                };
+
+                windowList[i].Initialized += new EventHandler((s, ea) => // тут надо зарефакторить media- это для медиа, а для html надо cefsharp 
+                {
+                    if (fileMedia.AbsolutePath.Contains("index.html"))
+                    {
+                        //метод 1 - (сделать проверки для всякого (например нужно ли запись включать и тд (проверить что будет если не обявить функцию (то есть код будет проверять какие функции есть в обоях при ошибке = false, значит метод не будет работать)))+ можно асинхронность но потом под конец(сначала главное чтобы работало))
+                        SetHtmlWallpaper.FilePath = Path.GetDirectoryName(fileMedia.LocalPath);
+                        SetHtmlWallpaper.SetBrowserAsWallpaper(windowList[i]);
+
+                        currentlyPlaying = true;
+                    }
+                    else
+                    {
+                        //метод 2-в него то что ниже
+                        SetMediaAsWallpaper(windowList[i], i);
+
+                        currentlyPlaying = true;
+                    }
+
+                    HWND windowHandle = new WindowInteropHelper(windowList[i]).Handle;
+                    User32.SetParent(windowHandle, workerw);
+                });
+                windowList[i].UpdateLayout();
+                windowList[i].Show();
+                WallpaperStretchTypeComboBox_SelectionChanged(null, null);
+            }
+        }
+
+        private void UnSetWallpaper_Click(object sender, RoutedEventArgs e)
+        {
+            UnSetWall();
+        }
+
+        private void Volume_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (currentlyPlaying)
+            mediaList[0].Volume = Volume.Value;
+        }
+
+        private void WallpaperStretchTypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!WindowInitialized || mediaList == null) return;
+
+            foreach (MediaElement mediaItem in mediaList)
+            {
+                mediaItem.Stretch = (Stretch)WallpaperStretchTypeComboBox.SelectedIndex;
+            }
+        }
+
+        #endregion
+
+        #endregion
+
+        #region TaskBar
         private void ApplyToAllTaskbars() // панель задач одна так что хз проверить с 2 мониками
         {
             Taskbars.Bars = new List<Taskbar>();
@@ -350,7 +437,6 @@ namespace WiPapper
             {
                 if (FindTaskbarHandles) // Если нужно искать дескрипторы панелей задач
                 {
-
                     Taskbars.Bars.Add(new Taskbar(User32.FindWindow("Shell_TrayWnd", null))); // Добавление главной панели задач в список
                     HWND otherBars = IntPtr.Zero;
 
@@ -364,7 +450,7 @@ namespace WiPapper
 
                     FindTaskbarHandles = false; // Завершение поиска дескрипторов панелей задач
 
-                    App.Current.Dispatcher.Invoke(() => UpdateAllSettings()); // Обновление всех настроек для добавленных панелей задач
+                    App.Current.Dispatcher.Invoke(() => UpdateAllTBSettings()); // Обновление всех настроек для добавленных панелей задач
                 }
 
                 if (Taskbars.MaximizedStateChanged) // Если изменилось состояние максимизации окон
@@ -382,18 +468,21 @@ namespace WiPapper
             }
         }
 
-        protected override void OnSourceInitialized(EventArgs e) //5
+        protected override void OnSourceInitialized(EventArgs e) //5 //переопределяет базовый метод OnSourceInitialized в классе Window.Этот метод вызывается, когда инициализируется источник окна, то есть когда окно было создано и готово к отображению.
         {
-            base.OnSourceInitialized(e);
+            base.OnSourceInitialized(e); //В контексте WPF, класс Window имеет событие SourceInitialized, которое срабатывает, когда источник окна был инициализирован.
+                                         //Если вы переопределяете метод OnSourceInitialized в производном классе, вызов base.OnSourceInitialized(e) гарантирует, что все обработчики событий SourceInitialized в базовом классе Window также будут вызваны.
+                                         //Это важно, потому что базовый класс может иметь важную логику, связанную с этим событием, которую нужно выполнить.
+                                         //Если вы не вызовете base.OnSourceInitialized(e), эта логика будет пропущена, что может привести к непредвиденным последствиям.
 
             IntPtr mainWindowPtr = new WindowInteropHelper(this).Handle; //Этот код создает переменную mainWindowPtr, которая будет содержать дескриптор окна (Window Handle) вашего WPF окна (this). Дескриптор окна - это числовое значение, которое уникально идентифицирует окно в операционной системе Windows.
             HwndSource mainWindowSrc = HwndSource.FromHwnd(mainWindowPtr); //Общий сценарий использования HwndSource заключается в интеграции элементов WPF в существующий Win32 или WinAPI код, где HwndSource позволяет вам связать оконный дескриптор и ресурсы WPF, обеспечивая совместимость между двумя подходами в построении графических интерфейсов.
-            mainWindowSrc.AddHook(WndProc); // В вашем коде mainWindowSrc.AddHook(WndProc); вы регистрируете метод WndProc в качестве обработчика оконных сообщений для окна, на которое ссылается mainWindowSrc. Это позволяет вашему WPF окну получать и обрабатывать низкоуровневые оконные сообщения, которые в противном случае могли бы быть обработаны стандартным оконной процедурой WinAPI.
+            mainWindowSrc.AddHook(WndProc); // В вашем коде mainWindowSrc.AddHook(WndProc); вы регистрируете метод WndProc в качестве обработчика оконных сообщений для окна, на которое ссылается mainWindowSrc. Это позволяет вашему WPF окну получать и обрабатывать низкоуровневые оконные сообщения, которые в противном случае могли бы быть обработаны стандартным оконной процедурой WinAPI.(кароче система отправляет сообщения хук их перехватывает так сказать, а wndproc это обработцик этих сообщений)
         }
 
         private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled) //6 // Обработчик сообщений окна //5161151515115
         {
-            if (msg == WM_TASKBARCREATED) // Если получено сообщение о создании панели задач(из будующего: речь идет о новом окне приложения я надеюсь?)
+            if (msg == WM_TASKBARCREATED) // Если получено сообщение о создании панели задач // это системное сообщение, которое операционная система Windows отправляет всем окнам, когда создается новая панель задач.
             {
                 FindTaskbarHandles = true; // Установка флага для поиска дескрипторов панелей задач
                 handled = true;
@@ -406,11 +495,12 @@ namespace WiPapper
             }
 
             return IntPtr.Zero;
+
+            //Таким образом, хотя ваше приложение в основном обрабатывает сообщения, связанные с его собственным окном, оно также может обрабатывать определенные системные сообщения, такие как WM_TASKBARCREATED, которые относятся к глобальным событиям в операционной системе. Это позволяет вашему приложению реагировать на изменения в системе, такие как создание новой панели задач.
         }
 
         static void WinEventProc(User32.HWINEVENTHOOK hWinEventHook, uint winEvent, HWND hwnd, int idObject, int idChild, uint idEventThread, uint dwmsEventTime) //В целом, этот метод служит для отслеживания и получения информации о параметрах окна, связанных с событием, которое вызвало этот обработчик событий. Полученная информация может быть использована для дальнейшей обработки события в вашем приложении. //ничё не понял очень долгий цикл, но скорее всего это тот хук и он постоянно работает
         {  // не надо по моим ощущениям (просто проверяет все окна по их состояниям )           
-
             User32.WINDOWPLACEMENT placement = new User32.WINDOWPLACEMENT();
             placement.length = (uint)Marshal.SizeOf(placement);
             User32.GetWindowPlacement(hwnd, ref placement);
@@ -456,7 +546,7 @@ namespace WiPapper
             }
         }
 
-        private void UpdateAllSettings() // Обновление всех настроек, включая акцент, цвет, флаги и пр.
+        private void UpdateAllTBSettings() // Обновление всех настроек, включая акцент, цвет, флаги и пр. TaskBar
         {
             SetAccentState(AccentComboBox.SelectedIndex);
             SetTaskbarColor(ColorPicker.SelectedColor ?? System.Windows.Media.Color.FromArgb(255, 255, 255, 255));
@@ -474,13 +564,12 @@ namespace WiPapper
 
             if (TaskbarBeingEdited == "Main")
             {
-                EditSwitchButton.Content = $"Основная панель задач";
+                EditSwitchButton.Content = "Основная панель задач";
             }
             else if (TaskbarBeingEdited == "Maximized")
             {
-                EditSwitchButton.Content = $"Дополнительная панель задач";
+                EditSwitchButton.Content = "Дополнительная панель задач";
             }
-            
         }
 
         private void ShowTaskbarSettings(string tb) //Этот метод позволяет отобразить настройки главной панели задачи в интерфейсе вашего приложения, чтобы пользователь мог видеть текущие значения настроек и, возможно, их изменить.
@@ -504,130 +593,7 @@ namespace WiPapper
             }
         }
 
-        #endregion Functions
-
-        #region Events( кнопочки и тд можно тут)
-
-        #region Wallpaper Events
-        private void SelectWall_Click(object sender, RoutedEventArgs e)
-        {
-            var fileDialog = new System.Windows.Forms.OpenFileDialog();
-            fileDialog.Filter = "All files(*.*)|*.*";
-
-            var rezult = fileDialog.ShowDialog();
-
-            switch (rezult)
-            {
-                case System.Windows.Forms.DialogResult.OK:
-                    //file = fileDialog.FileName;
-                    fileMedia = new Uri(fileDialog.FileName);
-                    SetWallpaperButton.IsEnabled = true;
-                    break;
-                case System.Windows.Forms.DialogResult.Cancel:
-                    break;
-                default:
-                    SetWallpaperButton.IsEnabled = false;
-                    break;
-
-            }
-        }
-
-        private void SetWallpaperButton_Click(object sender, RoutedEventArgs e)
-        {
-            FindWorkerWindow();
-
-            if (fileMedia == null)
-            {
-                SetWallpaperButton.IsEnabled = false;
-                return;
-            }
-            if (currentlyPlaying == true)
-            {
-                UnSetWall();
-            }
-
-            for (int i = 0; i < windowList.Count; i++) // можно цикл убрать и сделать для 1 монитора иначе потом для не 1го монитора надо асинхронность
-            {
-                //Window window = new Window(); //сделать одно окно
-
-                windowList[i] = new Window();
-
-                windowList[i].WindowStyle = WindowStyle.None;
-                windowList[i].AllowsTransparency = true;
-
-                windowList[i].Top = ScreenList[i].Top;
-                windowList[i].Left = ScreenList[i].Left;
-                windowList[i].Width = ScreenList[i].Width;
-                windowList[i].Height = ScreenList[i].Height;
-
-                windowList[i].Initialized += new EventHandler((s, ea) => // тут надо зарефакторить media- это для медиа, а для html надо cefsharp 
-                {
-                    if (fileMedia.AbsolutePath.Contains("index.html"))
-                    {
-                        //метод 1 - (сделать проверки для всякого (например нужно ли запись включать и тд (проверить что будет если не обявить функцию (то есть код будет проверять какие функции есть в обоях при ошибке = false, значит метод не будет работать)))+ можно асинхронность но потом под конец(сначала главное чтобы работало))
-                        SetHtmlWallpaper.FilePath = Path.GetDirectoryName(fileMedia.LocalPath);
-                        SetHtmlWallpaper.SetBrowserAsWallpaper(windowList[i]);
-
-                        currentlyPlaying = true;
-                    }
-                    else
-                    {
-                        //метод 2-в него то что ниже
-                        SetMediaAsWallpaper(windowList[i]);
-
-                        currentlyPlaying = true;
-                    }
-
-                    HWND windowHandle = new WindowInteropHelper(windowList[i]).Handle;
-                    User32.SetParent(windowHandle, workerw);
-                });
-                windowList[i].UpdateLayout();
-                windowList[i].Show();
-                WallpaperStretchTypeComboBox_SelectionChanged(null, null);
-            }
-        }
-
-        private void UnSetWallpaper_Click(object sender, RoutedEventArgs e)
-        {
-            UnSetWall();
-        }
-
-        private void Volume_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (currentlyPlaying == true)
-                media.Volume = Volume.Value;
-        }
-
-        private void WallpaperStretchTypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (!WindowInitialized || media == null) return;
-            media.Stretch = (Stretch)WallpaperStretchTypeComboBox.SelectedIndex;
-        }
-
-
-        #endregion
-
-        #region TaskBar Events
-
-
-        #endregion
-        private void StartStopButton_Click(object sender, RoutedEventArgs e) // Обработчик события нажатия кнопки Start/Stop
-        {
-            if (RunApplyTask)
-            {
-                StartStopButton.Content = "Начать";
-                RunApplyTask = false;
-            }
-            else
-            {
-                StartStopButton.Content = "Остановить";
-                RunApplyTask = true;
-
-                ApplyTask = new Task(() => ApplyToAllTaskbars()); // Создание и запуск задачи ApplyToAllTaskbars
-                ApplyTask.Start();
-            }
-        }
-
+        #region Events
         private void AccentComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e) //Общая цель этого обработчика события - реагировать на изменение выбранного элемента в AccentStateComboBox и выполнить какие-либо действия на основе этого изменения, возможно, изменить параметры приложения связанные с AccentState.
         {   // Обработчик события изменения выбранного элемента в AccentStateComboBox
             if (!WindowInitialized) return;
@@ -641,23 +607,6 @@ namespace WiPapper
             SetTaskbarColor(ColorPicker.SelectedColor ?? System.Windows.Media.Color.FromArgb(255, 255, 255, 255));
         }
 
-        private void ColorizeCB_Changed(object sender, RoutedEventArgs e)
-        {   // Обработчик события изменения состояния флажка ColorizeBlurCheckBox
-            if (!WindowInitialized) return;
-            SetAccentFlags(ColorizeCB.IsChecked ?? false);
-        }
-
-        //private void SysTrayIcon_MouseClick(object sender, EventArgs e)
-        //{   // Обработчик события клика мыши на иконке в системном лотке
-        //    System.Windows.Forms.MouseEventArgs me = (System.Windows.Forms.MouseEventArgs)e;
-        //    if (me.Button == System.Windows.Forms.MouseButtons.Right)
-        //    {
-        //        SysTrayContextMenu.PlacementTarget = sender as Button;
-        //        SysTrayContextMenu.IsOpen = true;
-        //        this.Activate();
-        //    }
-        //}
-
         private void WindowsAccentColorCheckBox_Changed(object sender, RoutedEventArgs e)
         {
             Globals.WindowsAccentColor = WindowsAccentColor.GetColorAsInt();
@@ -669,11 +618,10 @@ namespace WiPapper
             //GradientColorPicker.IsEnabled = !use;
         }
 
-        private void UseMaximizedSettingsCheckBox_Changed(object sender, RoutedEventArgs e) //
-        {   // Обработчик события изменения состояния флажка UseMaximizedSettingsCheckBox
+        private void ColorizeCB_Changed(object sender, RoutedEventArgs e)
+        {   // Обработчик события изменения состояния флажка ColorizeBlurCheckBox
             if (!WindowInitialized) return;
-            OptionsManager.Options.UseDifferentSettingsWhenMaximized = UseMaximizedSettingsCheckBox.IsChecked ?? false;
-            Taskbars.UpdateAllSettings();
+            SetAccentFlags(ColorizeCB.IsChecked ?? false);
         }
 
         private void AccentAlphaSlider_DragCompleted(object sender, RoutedEventArgs e)
@@ -696,23 +644,6 @@ namespace WiPapper
             }
         }
 
-        private void StartWithWindowsCheckBox_Changed(object sender, RoutedEventArgs e)
-        {
-            if (!WindowInitialized) return;
-
-            OptionsManager.Options.StartWithWindows = StartWithWindowsCheckBox.IsChecked ?? false;
-
-            try
-            {
-                if (OptionsManager.Options.StartWithWindows) { rkApp.SetValue("WiPapper", $"\"{MyPath}\""); }
-                else { rkApp.DeleteValue("WiPapper", false); }
-            }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show(ex.Message, "Failed to Set Registry Key");  //исправить на русский
-            }
-        }
-
         private void EditSwitchButton_Click(object sender, RoutedEventArgs e)
         {
             if (TaskbarBeingEdited == "Main")
@@ -724,8 +655,25 @@ namespace WiPapper
                 SwitchTaskbarBeingEdited("Main");
             }
         }
-        #endregion Control Handles
 
+        private void StartStopButton_Click(object sender, RoutedEventArgs e) // Обработчик события нажатия кнопки Start/Stop
+        {
+            if (RunApplyTask)
+            {
+                StartStopButton.Content = "Начать";
+                RunApplyTask = false;
+            }
+            else
+            {
+                StartStopButton.Content = "Остановить";
+                RunApplyTask = true;
 
+                ApplyTask = new Task(() => ApplyToAllTaskbars()); // Создание и запуск задачи ApplyToAllTaskbars
+                ApplyTask.Start();
+            }
+        }
+        #endregion
+
+        #endregion
     }
 }

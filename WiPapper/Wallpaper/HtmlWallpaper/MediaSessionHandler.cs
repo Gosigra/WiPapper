@@ -1,23 +1,11 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Media.Imaging;
-using System.Net.WebSockets;
-using System.Threading;
-using System.Numerics;
 using CefSharp;
 using CefSharp.Wpf;
 using Windows.Media.Control;
 using Windows.Storage.Streams;
-using NAudio.Wave;
-using System.Text.Json;
-using System.Windows.Controls;
-using System.Windows.Interop;
-using Vanara.PInvoke;
-
 
 namespace WiPapper.Wallpaper.HtmlWallpaper
 {
@@ -28,7 +16,6 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
         private static readonly PlaybackInfo playbackInfo = new PlaybackInfo();
         private static GlobalSystemMediaTransportControlsSession session;
 
-
         public static void IsBrowserInitialized(object sender, DependencyPropertyChangedEventArgs e)
         {
             GlobalSystemMediaTransportControlsSessionManager sessionManager = GlobalSystemMediaTransportControlsSessionManager.RequestAsync().GetAwaiter().GetResult();
@@ -37,7 +24,7 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
             sessionManager.CurrentSessionChanged += SessionManager_CurrentSessionChanged; // работает между разными приложениями
             SetHtmlWallpaper.Browser.FrameLoadEnd += Browser_FrameLoadEnd;
 
-            SetHtmlWallpaper.Browser.ShowDevTools();// убрать или сделать для разработчиков
+            //SetHtmlWallpaper.Browser.ShowDevTools();// убрать или сделать для разработчиков
             UpdateSession(session);
         }
 
@@ -166,14 +153,18 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
         {
             if (mediaProperties.ThumbnailURL == oldThumbnailUrl) return;
 
-            Application.Current.Dispatcher.Invoke(() =>
+            for (int i = 0; i < MainWindow.windowList.Count; i++)
             {
-                if (SetHtmlWallpaper.Browser.IsLoaded)
+                Application.Current.Dispatcher.Invoke(() =>
                 {
-                    SetHtmlWallpaper.Browser.ExecuteScriptAsync("updateInfo", mediaProperties.Artist, mediaProperties.Title, mediaProperties.ThumbnailURL); //Добавить отправку всего.                        
-                    oldThumbnailUrl = mediaProperties.ThumbnailURL ?? string.Empty; // проверить
-                }
-            });
+                    if (SetHtmlWallpaper.Browser.IsLoaded)
+                    {
+                        ChromiumWebBrowser browser = MainWindow.windowList[i].Content as ChromiumWebBrowser;
+                        browser.ExecuteScriptAsync("updateInfo", mediaProperties.Artist, mediaProperties.Title, mediaProperties.ThumbnailURL); //Добавить отправку всего.                        
+                        oldThumbnailUrl = mediaProperties.ThumbnailURL ?? string.Empty; // проверить
+                    }
+                });
+            }
         }
     }
 }

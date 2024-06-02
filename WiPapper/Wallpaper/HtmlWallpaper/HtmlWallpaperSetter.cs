@@ -1,24 +1,9 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Media.Imaging;
-using System.Net.WebSockets;
-using System.Threading;
-using System.Numerics;
-using CefSharp;
 using CefSharp.Wpf;
-using Windows.Media.Control;
-using Windows.Storage.Streams;
-using NAudio.Wave;
-using System.Text.Json;
-using System.Windows.Controls;
-using System.Windows.Interop;
-using Vanara.PInvoke;
-using WiPapper.Wallpaper.HtmlWallpaper;
-using CefSharp.DevTools.Network;
 
 namespace WiPapper.Wallpaper.HtmlWallpaper
 {
@@ -27,7 +12,6 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
         public static bool UsePowerMethod { get; set; }
         public static ChromiumWebBrowser Browser { get; set; }
         public static string FilePath { get; set; }
-
 
         public static void SetBrowserAsWallpaper(Window windowList)
         {
@@ -80,7 +64,6 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
                 case "/":
                     filePath = FilePath + "/index.html";
                     break;
-                    
                 default:
                     filePath = FilePath + requestedFile;
                     break;

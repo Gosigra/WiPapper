@@ -1,8 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Text.Json;
-
-namespace WiPapper.AppOptions
+﻿namespace WiPapper.AppOptions
 {
     [System.SerializableAttribute()] // Атрибут, указывающий, что класс Options может быть сериализован. Этот атрибут может использоваться фреймворком для определения того, как обрабатывать этот класс при сериализации и десериализации.
     [System.ComponentModel.DesignerCategoryAttribute("code")] //Атрибут, указывающий категорию, к которой относится класс в дизайнере.
@@ -35,13 +31,13 @@ namespace WiPapper.AppOptions
 
         public bool StartWhenLaunched
         {
-            get => this._startWhenLaunchedField; 
+            get => this._startWhenLaunchedField;
             set => this._startWhenLaunchedField = value;
         }
 
         public bool UseDifferentSettingsWhenMaximized
         {
-            get => this._useDifferentSettingsWhenMaximizedField; 
+            get => this._useDifferentSettingsWhenMaximizedField;
             set => this._useDifferentSettingsWhenMaximizedField = value;
         }
 
@@ -118,7 +114,6 @@ namespace WiPapper.AppOptions
                 this._accentStateField = value;
                 Taskbars.UpdateAccentState();
             }
-
         }
 
         /// <remarks/>
@@ -165,7 +160,6 @@ namespace WiPapper.AppOptions
             }
         }
     }
-
 
     //Аналогично
     /// <remarks/>
