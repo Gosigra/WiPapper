@@ -17,6 +17,7 @@ using Microsoft.Win32;
 using static WiPapper.Globals;
 using WiPapper.Wallpaper.HtmlWallpaper;
 using WiPapper.AppOptions;
+using static System.Net.WebRequestMethods;
 
 //Получать высоту панели задач и передавать в браузер её + цвет панели чтобы на сайте можно было сделать визуализацию как будто от панели задач столбцы(подумал что можно без высоты и чтобы разработчики сами её писали)
 
@@ -93,6 +94,33 @@ namespace WiPapper
             * ButtonList will be used to create dynamically button in order to select and load a file for each monitor *Not yet implemented*  
             * //ButtonList будет использоваться для динамического создания кнопки для выбора и загрузки файла для каждого монитора *Пока не реализовано*
             */
+
+
+
+
+            //var url = Environment.GetEnvironmentVariable("SUPABASE_URL");
+            //var key = Environment.GetEnvironmentVariable("SUPABASE_KEY");
+            var url = "https://kswefyoocehyihrohpqj.supabase.co";
+            var key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtzd2VmeW9vY2VoeWlocm9ocHFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc2Nzg1MjgsImV4cCI6MjAzMzI1NDUyOH0.8b_eNchjg7RdcE_7lw8qp4u9YxMW6j2YgHAOK58hioE";
+
+            var options = new Supabase.SupabaseOptions
+            {
+                AutoConnectRealtime = true
+            };
+
+            var supabase = new Supabase.Client(url, key, options);
+            supabase.InitializeAsync();
+
+
+
+
+
+
+
+
+
+
+
 
         }
 
