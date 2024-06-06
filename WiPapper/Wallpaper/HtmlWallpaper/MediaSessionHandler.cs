@@ -35,6 +35,9 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
                 AudioProcessor.RecordAudioData();
                 //await RecordAudioData();
 
+
+                SetHtmlWallpaper.Browser.ShowDevTools();
+
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     //SetHtmlWallpaper.browser.ExecuteScriptAsync("updateInfo", mediaProperties.Artist, mediaProperties.Title, mediaProperties.ThumbnailURL);

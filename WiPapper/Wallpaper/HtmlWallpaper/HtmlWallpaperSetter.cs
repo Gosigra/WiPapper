@@ -3,6 +3,7 @@ using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using System.Windows;
+using CefSharp;
 using CefSharp.Wpf;
 
 namespace WiPapper.Wallpaper.HtmlWallpaper

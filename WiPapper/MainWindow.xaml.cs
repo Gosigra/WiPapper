@@ -273,7 +273,7 @@ namespace WiPapper
             grid.Children.Add(mediaList[i]);
 
             mediaList[i].Source = fileMedia;
-            mediaList[i].LoadedBehavior = MediaState.Manual;  //454532542254
+            mediaList[i].LoadedBehavior = MediaState.Manual;
             mediaList[i].Volume = 0;
 
             mediaList[i].MediaEnded += (send, eArgs) =>
@@ -326,7 +326,7 @@ namespace WiPapper
         #region Events
         private void SelectWall_Click(object sender, RoutedEventArgs e)
         {
-            System.Windows.Forms.OpenFileDialog fileDialog = null;
+            System.Windows.Forms.OpenFileDialog fileDialog = new System.Windows.Forms.OpenFileDialog();
             fileDialog.Filter = "All files(*.*)|*.*";
 
             var rezult = fileDialog.ShowDialog();
