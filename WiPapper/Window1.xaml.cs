@@ -23,5 +23,71 @@ namespace WiPapper
         {
             InitializeComponent();
         }
+
+        private void AccentComboBox_SelectionChanged(object sender, RoutedEventArgs e)
+        {
+            //WallpaperButton.IsEnabled = false;
+            //TaskBarButton.IsEnabled = true;
+        }
+
+        private void UseMaximizedSettingsCheckBox_Changed(object sender, RoutedEventArgs e)
+        {
+            //TaskBarButton.IsEnabled = false;
+            //WallpaperButton.IsEnabled = true;
+        }
+
+        private void StartWithWindowsCheckBox_Changed(object sender, RoutedEventArgs e)
+        {
+            
+        }
+        private void ColorPicker_SelectedColorChanged(object sender, RoutedEventArgs e)
+        {
+            
+        }
+        private void WindowsAccentColorCheckBox_Changed(object sender, RoutedEventArgs e)
+        {
+            
+        }
+        private void ColorizeCB_Changed(object sender, RoutedEventArgs e)
+        {
+            
+        }
+        private void AccentAlphaSlider_DragCompleted(object sender, RoutedEventArgs e)
+        {
+            
+        }
+        private void AccentAlphaSlider_DragStarted(object sender, RoutedEventArgs e)
+        {
+            
+        }
+        private void AccentAlphaSlider_ValueChanged(object sender, RoutedEventArgs e)
+        {
+            
+        }
+
+        private void SelectWall_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void SetWallpaperButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void UnSetWallpaper_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        private void Volume_ValueChanged(object sender, RoutedEventArgs e)
+        {
+
+        }
+        private void WallpaperStretchTypeComboBox_SelectionChanged(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+
     }
 }

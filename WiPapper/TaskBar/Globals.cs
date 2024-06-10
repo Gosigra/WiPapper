@@ -133,6 +133,7 @@ namespace WiPapper
             SetAccentState(TaskbarBeingEdited, stateIndex);
         }
         //Эти методы позволяют управлять и изменять состояние акцента для различных панелей задачи в зависимости от текущего контекста редактирования в вашем приложении.
+
         public static void SetAccentState(string taskbar, int stateIndex) //аналогично
         {
             if (taskbar == "Main")

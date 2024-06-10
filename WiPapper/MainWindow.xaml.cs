@@ -18,6 +18,18 @@ using static WiPapper.Globals;
 using WiPapper.Wallpaper.HtmlWallpaper;
 using WiPapper.AppOptions;
 using static System.Net.WebRequestMethods;
+using static Supabase.Postgrest.QueryOptions;
+using Supabase;
+using CefSharp.DevTools.WebAuthn;
+using Supabase.Postgrest.Models;
+using Supabase.Postgrest.Attributes;
+using Supabase.Gotrue;
+using System.Diagnostics;
+using System.Xml.Linq;
+using Supabase.Gotrue.Exceptions;
+
+using System.Collections.ObjectModel;
+
 
 //Получать высоту панели задач и передавать в браузер её + цвет панели чтобы на сайте можно было сделать визуализацию как будто от панели задач столбцы(подумал что можно без высоты и чтобы разработчики сами её писали)
 
@@ -35,6 +47,8 @@ namespace WiPapper
         // Реестровый ключ для запуска с Windows
         readonly RegistryKey rkApp = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true); //Registry.CurrentUser = HKEY_CURRENT_USER
         NotifyIcon notifyIcon;
+
+        Session session;
 
         #region wlp
         public static List<Rectangle> ScreenList;
@@ -76,7 +90,13 @@ namespace WiPapper
         {
             InitializeComponent();
 
-            FillLists();
+            DataContext = this;
+            LoadImagesFromSupabase();
+
+            //Window1 window1 = new Window1();
+            //window1.Show();
+
+            //FillLists();
 
             InitializeNotifyIcon();
 
@@ -96,23 +116,12 @@ namespace WiPapper
             */
 
 
-
-
-            //var url = Environment.GetEnvironmentVariable("SUPABASE_URL");
-            //var key = Environment.GetEnvironmentVariable("SUPABASE_KEY");
-            var url = "https://kswefyoocehyihrohpqj.supabase.co";
-            var key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtzd2VmeW9vY2VoeWlocm9ocHFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc2Nzg1MjgsImV4cCI6MjAzMzI1NDUyOH0.8b_eNchjg7RdcE_7lw8qp4u9YxMW6j2YgHAOK58hioE";
-
-            var options = new Supabase.SupabaseOptions
-            {
-                AutoConnectRealtime = true
-            };
-
-            var supabase = new Supabase.Client(url, key, options);
-            supabase.InitializeAsync();
+            DB.DataBase db = new DB.DataBase();
+            db.Start();
 
 
 
+            FillLists();
 
 
 
@@ -592,11 +601,11 @@ namespace WiPapper
 
             if (TaskbarBeingEdited == "Main")
             {
-                EditSwitchButton.Content = "Основная панель задач";
+                EditSwitchTextBlock.Text = "Основная панель задач";
             }
             else if (TaskbarBeingEdited == "Maximized")
             {
-                EditSwitchButton.Content = "Дополнительная панель задач";
+                EditSwitchTextBlock.Text = "Дополнительная панель задач";
             }
         }
 
@@ -703,5 +712,249 @@ namespace WiPapper
         #endregion
 
         #endregion
+
+
+
+
+        private async void Button_Click(object sender, RoutedEventArgs e)
+        {
+            string email = AutorizationEmailTextBox.Text;
+            string password = AutorizationPasswordTextBox.Password;
+
+            //if (email == string.Empty || password == string.Empty)
+            //{
+            //    System.Windows.MessageBox.Show("Заполните все поля");
+            //}
+            //else
+            //{
+            //    session = await DB.DataBase._supabase.Auth.SignIn(email, password); //Supabase.Gotrue.Exceptions.GotrueException: "{"error":"invalid_grant","error_description":"Invalid login credentials"}"
+            //                                                                        //Supabase.Gotrue.Exceptions.GotrueException: "{"error":"invalid_grant","error_description":"Invalid login credentials"}"
+            //    AutorizationEmailTextBox.Text = null;
+            //    AutorizationPasswordTextBox.Password = null;
+            //}
+
+            try
+            {
+                var session = await DB.DataBase._supabase.Auth.SignIn(email, password);
+
+                if (session != null)
+                {
+                    System.Windows.MessageBox.Show("Успешный вход!", "Авторизация", MessageBoxButton.OK, MessageBoxImage.Information);
+                    AccountTabControl.Visibility = Visibility.Collapsed;
+                    UserAutorizedPanel.Visibility = Visibility.Visible;
+                }
+            }
+            catch (GotrueException ex)
+            {
+                if (ex.Message.Contains("Invalid login credentials"))
+                {
+                    System.Windows.MessageBox.Show("Неверные учетные данные", "Ошибка авторизации", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                else
+                {
+                    System.Windows.MessageBox.Show($"Произошла ошибка: {ex.Message}", "Ошибка авторизации", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Произошла неизвестная ошибка: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+            private async void CreateAccountButton_Click(object sender, RoutedEventArgs e)
+        {
+            string name = RegisterNameTextBox.Text;
+            string email = RegisterEmailTextBox.Text;
+            string password = RegisterPasswordBox.Password;
+
+            if (name == string.Empty || email == string.Empty || password == string.Empty)
+            {
+                System.Windows.MessageBox.Show("Заполните все поля");
+            }
+            else
+            {
+                session = await DB.DataBase._supabase.Auth.SignUp(email, password);
+
+                var model = new UserInfo
+                {
+                    Id = session.User.Id,
+                    Name = name,
+                };
+
+                await DB.DataBase._supabase.From<UserInfo>().Insert(model);
+            }
+
+            RegisterNameTextBox.Text = null;
+            RegisterEmailTextBox.Text = null;
+            RegisterPasswordBox.Password = null;
+
+        }
+
+        [Table("client")]
+        class UserInfo:BaseModel
+        {
+            [Column("id")]
+            public string Id { get; set; }
+
+            [Column("name")]
+            public string Name { get; set; }
+        }
+
+
+
+        private async void LoadImagesFromSupabase()
+        {
+            // Пример кода для получения изображений из Supabase и добавления их в коллекцию Images
+            Images = new ObservableCollection<CustomImage>
+            {
+                new CustomImage { ImageUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSXqPjgMIQB8GV-Jm4yUMtRTHN5F6vc0WTzAA&s", ImageDescription = "Описание 1" },
+                new CustomImage { ImageUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSXqPjgMIQB8GV-Jm4yUMtRTHN5F6vc0WTzAA&s", ImageDescription = "Описание 2" }
+                // Добавьте больше изображений
+            };
+
+            ImagesContainer.ItemsSource = Images;
+
+
+        }
+
+
+            private ObservableCollection<CustomImage> _images;
+            public ObservableCollection<CustomImage> Images
+            {
+                get { return _images; }
+                set
+                {
+                    _images = value;
+                }
+            }
+
+
+        public class CustomImage : INotifyPropertyChanged
+        {
+            public event PropertyChangedEventHandler PropertyChanged;
+
+            private string _imageUrl;
+            public string ImageUrl
+            {
+                get { return _imageUrl; }
+                set
+                {
+                    _imageUrl = value;
+                }
+            }
+
+            private string _imageDescription;
+            public string ImageDescription
+            {
+                get { return _imageDescription; }
+                set
+                {
+                    _imageDescription = value;
+                }
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+        private async void UploadButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Сделать проверку(а может и не надо) по id есть ли у пользователя UrlTOwallp и добавить еще ссылку(DB.DataBase._supabase.Storage.Url (+ название папки которое выбрали (в БД должна сама создаться)))
+                //в UrlTOwallp получить название папок и таким образом я смогу указать создателя обоев
+
+                string folderPath;
+
+                using (var folderDialog = new FolderBrowserDialog())
+                {
+
+                    var rezult = folderDialog.ShowDialog();
+
+                    switch (rezult)
+                    {
+                        case System.Windows.Forms.DialogResult.OK:
+                            folderPath = folderDialog.SelectedPath;
+
+                            string[] files = Directory.GetFiles(folderPath);
+
+                            foreach (string file in files)
+                            {
+                                string fileName = Path.GetFileName(file);
+                                var asdds = await DB.DataBase._supabase.Storage
+                                    .From($"Wallpapers/{Path.GetFileName(folderPath)}")
+                                    .Upload(file, fileName, onProgress: (s, progress) => Debug.WriteLine($"{progress}%"));
+                            }
+                            break;
+                        case System.Windows.Forms.DialogResult.Cancel:
+                            break;
+                        default:
+                            break;
+
+                    }
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(ex.ToString());
+                
+            }
+
+
+
+
+
+        }
+
+        private async void DownloadButton_Click(object sender, RoutedEventArgs e)
+        {
+            string folderPath = null;
+
+            if (string.IsNullOrEmpty(DownloadPath.Text))
+            {
+                if (!Directory.Exists("Wallpapers"))
+                {
+                    // Создание папки, если она не существует
+                    Directory.CreateDirectory("Wallpapers"); //надо при получении из бд получать название папки и создавать папку с этим названием
+
+                }
+                folderPath = "Wallpapers";
+            }
+            else
+            {
+                folderPath = Directory.Exists(DownloadPath.Text) ?
+                    DownloadPath.Text :
+                    "Wallpapers";
+            }
+
+
+
+
+            var objects = await DB.DataBase._supabase.Storage.From("Wallpapers").List("gyahgsdf/");
+
+
+            foreach (var obj in objects)
+            {
+                var bytes = await DB.DataBase._supabase.Storage
+                  .From("Wallpapers")
+                  .Download($"gyahgsdf/{obj.Name}", (s, progress) => Debug.WriteLine($"{progress}%"));
+
+
+                System.IO.File.WriteAllBytes($"{folderPath}/{obj.Name}", bytes);
+
+                Console.WriteLine(bytes);
+            }
+        }
     }
 }

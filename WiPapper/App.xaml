@@ -2,8 +2,57 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:WiPapper"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!--<materialDesign:CustomColorTheme BaseTheme="Light" PrimaryColor="Aqua" SecondaryColor="DarkGreen" />
+            <materialDesign:CustomColorTheme BaseTheme="Light" PrimaryColor="SkyBlue" SecondaryColor="Teal" />
+            <materialDesign:CustomColorTheme BaseTheme="Light" PrimaryColor="LightBlue" SecondaryColor="Orange" />
+            <materialDesign:CustomColorTheme BaseTheme="Light" PrimaryColor="LightGreen" SecondaryColor="DarkRed" />
+            <materialDesign:CustomColorTheme BaseTheme="Light" PrimaryColor="LightCoral" SecondaryColor="DarkBlue" />
+            <materialDesign:CustomColorTheme BaseTheme="Light" PrimaryColor="LightSalmon" SecondaryColor="DarkCyan" />
+            <materialDesign:CustomColorTheme BaseTheme="Light" PrimaryColor="LightSkyBlue" SecondaryColor="DarkGoldenrod" />
+            <materialDesign:CustomColorTheme BaseTheme="Light" PrimaryColor="LightSteelBlue" SecondaryColor="DarkKhaki" />
+            <materialDesign:CustomColorTheme BaseTheme="Light" PrimaryColor="LightYellow" SecondaryColor="DarkMagenta" />
+            <materialDesign:CustomColorTheme BaseTheme="Light" PrimaryColor="LightSeaGreen" SecondaryColor="DarkOliveGreen" />
+            <materialDesign:CustomColorTheme BaseTheme="Light" PrimaryColor="LightPink" SecondaryColor="DarkSlateBlue" />
+            <materialDesign:CustomColorTheme BaseTheme="Light" PrimaryColor="LightGoldenrodYellow" SecondaryColor="DarkSlateGray" />
+            <materialDesign:CustomColorTheme BaseTheme="Light" PrimaryColor="Purple" SecondaryColor="Lime" />
+            <materialDesign:CustomColorTheme BaseTheme="Light" PrimaryColor="MediumPurple" SecondaryColor="Orange" />
+            <materialDesign:CustomColorTheme BaseTheme="Light" PrimaryColor="Orchid" SecondaryColor="Teal" />
+            <materialDesign:CustomColorTheme BaseTheme="Light" PrimaryColor="Violet" SecondaryColor="DarkCyan" />
+            <materialDesign:CustomColorTheme BaseTheme="Light" PrimaryColor="BlueViolet" SecondaryColor="DarkOrange" />
+            <materialDesign:CustomColorTheme BaseTheme="Light" PrimaryColor="MediumOrchid" SecondaryColor="DarkRed" />
+            <materialDesign:CustomColorTheme BaseTheme="Light" PrimaryColor="MediumSlateBlue" SecondaryColor="DarkGoldenrod" />
+            <materialDesign:CustomColorTheme BaseTheme="Light" PrimaryColor="SlateBlue" SecondaryColor="DarkKhaki" />
+            <materialDesign:CustomColorTheme BaseTheme="Light" PrimaryColor="DarkOrchid" SecondaryColor="DarkMagenta" />
+            <materialDesign:CustomColorTheme BaseTheme="Light" PrimaryColor="DarkViolet" SecondaryColor="LightGreen" />-->
+
+                <!--<materialDesign:CustomColorTheme BaseTheme="Light" PrimaryColor="SkyBlue" SecondaryColor="Teal" />-->
+                <!--<materialDesign:CustomColorTheme BaseTheme="Light" PrimaryColor="LightBlue" SecondaryColor="Orange" />-->
+                <!--<materialDesign:CustomColorTheme BaseTheme="Light" PrimaryColor="LightCoral" SecondaryColor="DarkBlue" />-->
+                <!--<materialDesign:CustomColorTheme BaseTheme="Light" PrimaryColor="MediumPurple" SecondaryColor="Orange" />-->
+                <!--<materialDesign:CustomColorTheme BaseTheme="Light" PrimaryColor="MediumOrchid" SecondaryColor="DarkRed" />-->
+                <!--<materialDesign:CustomColorTheme BaseTheme="Light" PrimaryColor="Lavender" SecondaryColor="SlateGray" />-->
+                <!--<materialDesign:CustomColorTheme BaseTheme="Light" PrimaryColor="MintCream" SecondaryColor="SeaGreen" />-->
+                <!--<materialDesign:CustomColorTheme BaseTheme="Light" PrimaryColor="PowderBlue" SecondaryColor="RoyalBlue" />-->
+                <!--<materialDesign:CustomColorTheme BaseTheme="Light" PrimaryColor="PeachPuff" SecondaryColor="Peru" />-->
+                <!--<materialDesign:CustomColorTheme BaseTheme="Light" PrimaryColor="LemonChiffon" SecondaryColor="Coral" />-->
+
+
+                <!--<materialDesign:CustomColorTheme BaseTheme="Light" PrimaryColor="DarkCyan" SecondaryColor="Coral" />-->
+                <materialDesign:CustomColorTheme BaseTheme="Light" PrimaryColor="#5a7785" SecondaryColor="Red" />
+
+
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />
+                <!--<ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml" />-->
+
+
+
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign3.Defaults.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

@@ -16,6 +16,13 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
 
         public static void SetBrowserAsWallpaper(Window windowList)
         {
+            //CefSettings settings = new CefSettings();
+            //settings.CefCommandLineArgs.Add("allow-file-access-from-files");
+            //settings.CefCommandLineArgs.Add("allow-universal-access-from-files");
+            //Cef.Initialize(settings);
+            //Browser.BrowserSettings
+
+
             Browser = new ChromiumWebBrowser("http://localhost:8723");
             windowList.Content = Browser;
 
@@ -42,9 +49,9 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
                         await ProcessResponse(requestRezult, response);
                     }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    MessageBox.Show(ex.ToString());
+                    //MessageBox.Show(ex.ToString());
                 }
             }
         }
@@ -56,6 +63,7 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
 
             switch (requestedFile)
             {
+                //case "/Use"
                 case "/UsePowerMethod":
                     UsePowerMethod = true;
                     break;

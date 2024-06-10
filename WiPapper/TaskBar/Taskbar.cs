@@ -29,7 +29,7 @@ namespace WiPapper
             bool isInThisScreen = false;
             IntPtr thisAppMonitor;
 
-            foreach (IntPtr hwnd in Globals.MaximizedWindows) //Итерация по списку максимизированных окон.
+            foreach (IntPtr hwnd in Globals.MaximizedWindows) //Итерация по списку максимизированных окон. // вылазит ошибка System.InvalidOperationException: "Коллекция была изменена; невозможно выполнить операцию перечисления."
             {
                 thisAppMonitor = (IntPtr)User32.MonitorFromWindow(hwnd, User32.MonitorFlags.MONITOR_DEFAULTTONEAREST); //Определение монитора для текущего окна.
                 if (Monitor == thisAppMonitor) { isInThisScreen = true; } //Проверка, находится ли окно на том же мониторе, что и панель задачи.

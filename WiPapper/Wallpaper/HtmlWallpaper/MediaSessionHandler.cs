@@ -15,10 +15,11 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
         private static readonly MediaProperties mediaProperties = new MediaProperties();
         private static readonly PlaybackInfo playbackInfo = new PlaybackInfo();
         private static GlobalSystemMediaTransportControlsSession session;
+        static GlobalSystemMediaTransportControlsSessionManager sessionManager = null;
 
         public static void IsBrowserInitialized(object sender, DependencyPropertyChangedEventArgs e)
         {
-            GlobalSystemMediaTransportControlsSessionManager sessionManager = GlobalSystemMediaTransportControlsSessionManager.RequestAsync().GetAwaiter().GetResult();
+            sessionManager = GlobalSystemMediaTransportControlsSessionManager.RequestAsync().GetAwaiter().GetResult();
             GlobalSystemMediaTransportControlsSession session = sessionManager.GetCurrentSession();
 
             sessionManager.CurrentSessionChanged += SessionManager_CurrentSessionChanged; // работает между разными приложениями
@@ -32,6 +33,7 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
         {
             if (args.Frame.IsMain)
             {
+
                 AudioProcessor.RecordAudioData();
                 //await RecordAudioData();
 
