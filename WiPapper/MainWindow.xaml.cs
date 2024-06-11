@@ -91,7 +91,7 @@ namespace WiPapper
             InitializeComponent();
 
             DataContext = this;
-            LoadImagesFromSupabase();
+            
 
             //Window1 window1 = new Window1();
             //window1.Show();
@@ -117,7 +117,7 @@ namespace WiPapper
 
 
             DB.DataBase db = new DB.DataBase();
-            db.Start();
+            Task.Run(() => db.Start());
 
 
 
@@ -761,7 +761,7 @@ namespace WiPapper
             }
         }
 
-            private async void CreateAccountButton_Click(object sender, RoutedEventArgs e)
+        private async void CreateAccountButton_Click(object sender, RoutedEventArgs e)
         {
             string name = RegisterNameTextBox.Text;
             string email = RegisterEmailTextBox.Text;
@@ -804,55 +804,53 @@ namespace WiPapper
 
         private async void LoadImagesFromSupabase()
         {
-            // Пример кода для получения изображений из Supabase и добавления их в коллекцию Images
-            Images = new ObservableCollection<CustomImage>
-            {
-                new CustomImage { ImageUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSXqPjgMIQB8GV-Jm4yUMtRTHN5F6vc0WTzAA&s", ImageDescription = "Описание 1" },
-                new CustomImage { ImageUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSXqPjgMIQB8GV-Jm4yUMtRTHN5F6vc0WTzAA&s", ImageDescription = "Описание 2" }
-                // Добавьте больше изображений
-            };
+            //// Пример кода для получения изображений из Supabase и добавления их в коллекцию Images
+            //Images = new ObservableCollection<CustomImage>
+            //{
+            //    new CustomImage { ImageUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSXqPjgMIQB8GV-Jm4yUMtRTHN5F6vc0WTzAA&s", ImageDescription = "Описание 1" },
+            //    new CustomImage { ImageUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSXqPjgMIQB8GV-Jm4yUMtRTHN5F6vc0WTzAA&s", ImageDescription = "Описание 2" }
+            //    // Добавьте больше изображений
+            //};
 
-            ImagesContainer.ItemsSource = Images;
-
-
+            //ImagesContainer.ItemsSource = Images;
         }
 
 
-            private ObservableCollection<CustomImage> _images;
-            public ObservableCollection<CustomImage> Images
-            {
-                get { return _images; }
-                set
-                {
-                    _images = value;
-                }
-            }
+        //private ObservableCollection<CustomImage> _images;
+        //public ObservableCollection<CustomImage> Images
+        //    {
+        //        get { return _images; }
+        //        set
+        //        {
+        //            _images = value;
+        //        }
+        //    }
 
 
-        public class CustomImage : INotifyPropertyChanged
-        {
-            public event PropertyChangedEventHandler PropertyChanged;
+        //public class CustomImage
+        //{
+        //    public event PropertyChangedEventHandler PropertyChanged;
 
-            private string _imageUrl;
-            public string ImageUrl
-            {
-                get { return _imageUrl; }
-                set
-                {
-                    _imageUrl = value;
-                }
-            }
+        //    private string _imageUrl;
+        //    public string ImageUrl
+        //    {
+        //        get { return _imageUrl; }
+        //        set
+        //        {
+        //            _imageUrl = value;
+        //        }
+        //    }
 
-            private string _imageDescription;
-            public string ImageDescription
-            {
-                get { return _imageDescription; }
-                set
-                {
-                    _imageDescription = value;
-                }
-            }
-        }
+        //    private string _imageDescription;
+        //    public string ImageDescription
+        //    {
+        //        get { return _imageDescription; }
+        //        set
+        //        {
+        //            _imageDescription = value;
+        //        }
+        //    }
+        //}
 
 
 
