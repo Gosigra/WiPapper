@@ -242,6 +242,8 @@
                                     Начать
                                 </Button.Content>
                             </Button>
+
+                            <Button Click="DownloadButton_Click"/>
                         </StackPanel>
                     </ScrollViewer>
                 </TabItem>
@@ -250,11 +252,11 @@
                     <TabItem.Header>
                         <materialDesign:PackIcon Kind="TrayArrowDown" Height="25" Width="25" Foreground="Black"/>
                     </TabItem.Header>
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" Background="LightGray">
                         <!--<WrapPanel x:Name="ImagesContainer2" Margin="10">
                             
                             <Button x:Name="DownloadButton" Content="Скачать" Width="100" Grid.Row="6" Grid.Column="1" HorizontalAlignment="Right" Click="DownloadButton_Click" Visibility="Collapsed"/>
                         </WrapPanel>-->
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Background="LightGray">
                         
                         <ItemsControl Name="ImagesContainer">
                             <ItemsControl.ItemsPanel>

@@ -70,6 +70,7 @@
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup />
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
@@ -99,6 +100,7 @@
     </ApplicationDefinition>
     <Compile Include="AppOptions\OptionsManager.cs" />
     <Compile Include="DB\DataBase.cs" />
+    <Compile Include="DB\ImageDetails.cs" />
     <Compile Include="TaskBar\Extensions.cs" />
     <Compile Include="TaskBar\Globals.cs" />
     <Compile Include="TaskBar\Taskbar.cs" />
@@ -155,7 +157,6 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="app.manifest" />
-    <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -210,23 +211,6 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\settings.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\user.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\account-outline.png" />
-    <Resource Include="Resources\account.png" />
-    <Resource Include="Resources\cog.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\abc.jpg" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\preview.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

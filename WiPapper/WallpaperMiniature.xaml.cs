@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Windows;
 using System.Windows.Controls;
+using WiPapper.DB;
 using static WiPapper.MainWindow;
 
 namespace WiPapper
@@ -17,14 +18,13 @@ namespace WiPapper
 
         private void DownloadButton_Click(object sender, RoutedEventArgs e)
         {
-            if (this.DataContext is CustomImage customImage)
-            {
+            if (this.DataContext is ImageDetails imageDetails)            {
                 // Скачивание изображения по URL
                 using (var client = new WebClient())
                 {
-                    string fileName = System.IO.Path.GetFileName(customImage.ImageUrl);
-                    client.DownloadFile(customImage.ImageUrl, fileName);
-                    MessageBox.Show($"Изображение сохранено как {fileName}", "Скачивание завершено", MessageBoxButton.OK, MessageBoxImage.Information);
+                    //string fileName = System.IO.Path.GetFileName(customImage.ImageUrl);
+                    //client.DownloadFile(customImage.ImageUrl, fileName);
+                    //MessageBox.Show($"Изображение сохранено как {fileName}", "Скачивание завершено", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
         }

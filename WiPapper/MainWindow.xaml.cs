@@ -29,6 +29,10 @@ using System.Xml.Linq;
 using Supabase.Gotrue.Exceptions;
 
 using System.Collections.ObjectModel;
+using System.Windows.Input;
+using Newtonsoft.Json;
+using Windows.System;
+using WiPapper.DB;
 
 
 //Получать высоту панели задач и передавать в браузер её + цвет панели чтобы на сайте можно было сделать визуализацию как будто от панели задач столбцы(подумал что можно без высоты и чтобы разработчики сами её писали)
@@ -91,7 +95,7 @@ namespace WiPapper
             InitializeComponent();
 
             DataContext = this;
-            
+            //LoadImagesFromSupabase();
 
             //Window1 window1 = new Window1();
             //window1.Show();
@@ -122,8 +126,6 @@ namespace WiPapper
 
 
             FillLists();
-
-
 
 
 
@@ -298,7 +300,7 @@ namespace WiPapper
 
         private void Window_Closed(object sender, EventArgs e)
         {
-            Environment.Exit(0);
+            //Environment.Exit(0); // была ошибка поэтому убрал
         }
 
         #region Wallpaper
@@ -721,21 +723,9 @@ namespace WiPapper
             string email = AutorizationEmailTextBox.Text;
             string password = AutorizationPasswordTextBox.Password;
 
-            //if (email == string.Empty || password == string.Empty)
-            //{
-            //    System.Windows.MessageBox.Show("Заполните все поля");
-            //}
-            //else
-            //{
-            //    session = await DB.DataBase._supabase.Auth.SignIn(email, password); //Supabase.Gotrue.Exceptions.GotrueException: "{"error":"invalid_grant","error_description":"Invalid login credentials"}"
-            //                                                                        //Supabase.Gotrue.Exceptions.GotrueException: "{"error":"invalid_grant","error_description":"Invalid login credentials"}"
-            //    AutorizationEmailTextBox.Text = null;
-            //    AutorizationPasswordTextBox.Password = null;
-            //}
-
             try
             {
-                var session = await DB.DataBase._supabase.Auth.SignIn(email, password);
+                session = await DB.DataBase._supabase.Auth.SignIn(email, password);
 
                 if (session != null)
                 {
@@ -762,7 +752,7 @@ namespace WiPapper
         }
 
         private async void CreateAccountButton_Click(object sender, RoutedEventArgs e)
-        {
+        {// в другой метод
             string name = RegisterNameTextBox.Text;
             string email = RegisterEmailTextBox.Text;
             string password = RegisterPasswordBox.Password;
@@ -790,7 +780,7 @@ namespace WiPapper
 
         }
 
-        [Table("client")]
+        [Table("client")]//
         class UserInfo:BaseModel
         {
             [Column("id")]
@@ -798,39 +788,32 @@ namespace WiPapper
 
             [Column("name")]
             public string Name { get; set; }
+
+            [Column("URLToWallpaper")]
+            public string[] urlToWallpaper { get; set; }
         }
 
 
 
-        private async void LoadImagesFromSupabase()
+        private void LoadImagesFromSupabase() //
         {
-            // Пример кода для получения изображений из Supabase и добавления их в коллекцию Images
-            Images = new ObservableCollection<CustomImage>
-            {
-                new CustomImage { ImageUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSXqPjgMIQB8GV-Jm4yUMtRTHN5F6vc0WTzAA&s", ImageDescription = "Описание 1" },
-                new CustomImage { ImageUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSXqPjgMIQB8GV-Jm4yUMtRTHN5F6vc0WTzAA&s", ImageDescription = "Описание 2" }
-                // Добавьте больше изображений
-            };
+            //// Пример кода для получения изображений из Supabase и добавления их в коллекцию Images
+            //Images = new ObservableCollection<CustomImage>
+            //{
+            //    new CustomImage { ImageUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSXqPjgMIQB8GV-Jm4yUMtRTHN5F6vc0WTzAA&s", ImageDescription = "Описание 1" },
+            //    new CustomImage { ImageUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSXqPjgMIQB8GV-Jm4yUMtRTHN5F6vc0WTzAA&s", ImageDescription = "Описание 2" }
+            //    // Добавьте больше изображений
+            //};
 
-            ImagesContainer.ItemsSource = Images;
+            //ImagesContainer.ItemsSource = Images;
         }
 
 
-        private ObservableCollection<CustomImage> _images;
-        public ObservableCollection<CustomImage> Images
-        {
-            get { return _images; }
-            set
-            {
-                _images = value;
-            }
-        }
+
 
 
         public class CustomImage
         {
-            public event PropertyChangedEventHandler PropertyChanged;
-
             private string _imageUrl;
             public string ImageUrl
             {
@@ -865,20 +848,19 @@ namespace WiPapper
 
 
         private async void UploadButton_Click(object sender, RoutedEventArgs e)
-        {
+        {//
             try
             {
                 // Сделать проверку(а может и не надо) по id есть ли у пользователя UrlTOwallp и добавить еще ссылку(DB.DataBase._supabase.Storage.Url (+ название папки которое выбрали (в БД должна сама создаться)))
-                //в UrlTOwallp получить название папок и таким образом я смогу указать создателя обоев
+                
+                
+                //в UrlTOwallp получить название папок и таким образом я смогу указать создателя обоев (потом при скачивании будут конфликты из за одинаковых имен)
 
                 string folderPath;
 
                 using (var folderDialog = new FolderBrowserDialog())
                 {
-
-                    var rezult = folderDialog.ShowDialog();
-
-                    switch (rezult)
+                    switch (folderDialog.ShowDialog())
                     {
                         case System.Windows.Forms.DialogResult.OK:
                             folderPath = folderDialog.SelectedPath;
@@ -891,6 +873,15 @@ namespace WiPapper
                                 var asdds = await DB.DataBase._supabase.Storage
                                     .From($"Wallpapers/{Path.GetFileName(folderPath)}")
                                     .Upload(file, fileName, onProgress: (s, progress) => Debug.WriteLine($"{progress}%"));
+
+                                var asd = DB.DataBase._supabase.Storage;
+                                if (file.Contains("preview"))
+                                {
+                                    var publicUrl = DB.DataBase._supabase.Storage.From("Wallpapers").GetPublicUrl($"{Path.GetFileName(folderPath)}/{Path.GetFileName(file)}"); //ссылку до preview а папку из ссылки этой 
+
+                                    var result = await DB.DataBase._supabase.Rpc("append_to_array", new { idd = Guid.Parse(session.User.Id), newelement = publicUrl });
+                                }
+                                Console.WriteLine();
                             }
                             break;
                         case System.Windows.Forms.DialogResult.Cancel:
@@ -900,8 +891,6 @@ namespace WiPapper
 
                     }
                 }
-
-
             }
             catch (Exception ex)
             {
@@ -915,16 +904,15 @@ namespace WiPapper
 
         }
 
-        private async void DownloadButton_Click(object sender, RoutedEventArgs e)
-        {
+        public async void DownloadButton_Click(object sender, RoutedEventArgs e)
+        {//
             string folderPath = null;
 
             if (string.IsNullOrEmpty(DownloadPath.Text))
             {
                 if (!Directory.Exists("Wallpapers"))
                 {
-                    // Создание папки, если она не существует
-                    Directory.CreateDirectory("Wallpapers"); //надо при получении из бд получать название папки и создавать папку с этим названием
+                    Directory.CreateDirectory("Wallpapers");
 
                 }
                 folderPath = "Wallpapers";
@@ -939,20 +927,59 @@ namespace WiPapper
 
 
 
-            var objects = await DB.DataBase._supabase.Storage.From("Wallpapers").List("gyahgsdf/");
+            
 
 
-            foreach (var obj in objects)
+
+
+            var result = await DB.DataBase._supabase  //туть для квадратиков
+                                      .From<UserInfo>()
+                                      .Select(x => new object[] {x.urlToWallpaper})
+                                      .Where(x => x.Id == session.User.Id)
+                                      .Get();
+
+
+            var content = JsonConvert.DeserializeObject<List<Dictionary<string, List<string>>>>(result.Content);
+
+            if (content.Count > 0 && content[0].ContainsKey("URLToWallpaper") && content[0]["URLToWallpaper"].Count > 0)
             {
-                var bytes = await DB.DataBase._supabase.Storage
-                  .From("Wallpapers")
-                  .Download($"gyahgsdf/{obj.Name}", (s, progress) => Debug.WriteLine($"{progress}%"));
+                foreach (var item in content[0]["URLToWallpaper"])
+                {
+                    string directory = Path.GetFileName(Path.GetDirectoryName(item));
 
-
-                System.IO.File.WriteAllBytes($"{folderPath}/{obj.Name}", bytes);
-
-                Console.WriteLine(bytes);
+                    ImageDetails imageDetails = new ImageDetails
+                    {
+                        ImageDescription = directory,
+                        ImageUrl = item
+                    };
+                }
             }
+
+
+
+
+
+
+            var objects = await DB.DataBase._supabase.Storage.From("Wallpapers").List();  //папки (надо сделать если в папке будут папки)  //скачивание
+
+            foreach(var obj  in objects)
+            {
+                var preview = await DB.DataBase._supabase.Storage.From("Wallpapers").List($"{obj.Name}");// файлы в папке
+
+                foreach (var prew in preview)
+                {
+                    var bytes = await DB.DataBase._supabase.Storage
+                      .From("Wallpapers")
+                      .Download($"{obj}/{prew.Name}", (s, progress) => Debug.WriteLine($"{progress}%")); // убрать прогресс
+
+
+                    System.IO.File.WriteAllBytes($"{folderPath}/{obj.Name}", bytes);
+
+                    Console.WriteLine(bytes);
+                }
+            }
+
+
         }
     }
 }
