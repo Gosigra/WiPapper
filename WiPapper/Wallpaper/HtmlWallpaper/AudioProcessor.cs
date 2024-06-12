@@ -11,32 +11,26 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
     internal static class AudioProcessor
     {
         public static int Channels { get; set; } = 1;
+        private static WasapiLoopbackCapture Capture = new WasapiLoopbackCapture();
 
-        public static bool StartOrStopRecording {
-            set
-            {
-                if (value)
-                {
-                    RecordAudioData();
-                }
-                else
-                {
-                    //capture.StopRecording();  // но надо ли это если при закрытии обоев запись сама выключится (наверное)
-                }
-            }
+        public static void ChangeWaweFormat()
+        {
+            Capture.StopRecording();
+            Channels = 2;
+            RecordAudioData();
         }
 
         public static void RecordAudioData() // channels, true = 2channels в host определить
         {
-            var capture = new WasapiLoopbackCapture();
-            capture.WaveFormat = new WaveFormat(48000, 16, Channels); // переменную для установки кол-ва каналов и обработку закрытия обоев(остановку записи(проверить может сама остановится при закрытии))
+            //var Capture = new WasapiLoopbackCapture();
+            Capture.WaveFormat = new WaveFormat(48000, 16, Channels); // переменную для установки кол-ва каналов и обработку закрытия обоев(остановку записи(проверить может сама остановится при закрытии))
 
-            capture.StartRecording();
-            capture.DataAvailable += (s, e) =>
+            Capture.StartRecording();
+            Capture.DataAvailable += (s, e) =>
             {
                 if (e.BytesRecorded != 0)
                 {
-                    ProcessAudioData(capture, e);
+                    ProcessAudioData(Capture, e);
                 }
             };
             // Для остановки записи, вы можете вызвать метод StopRecording
@@ -147,7 +141,7 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     ChromiumWebBrowser browser = MainWindow.windowList[i].Content as ChromiumWebBrowser;
-                    browser.ExecuteScriptAsync("wallpaperAudioListener", jsonAudioData);
+                    browser.ExecuteScriptAsync("wallpaperAudioListener", jsonAudioData); //надоедливая ошибка при закрытии обоев                    
                 });
             }
         }

@@ -67,6 +67,8 @@
     {
         private string _wallpapperPath; //добавить громкость чтобы сохранялась 
 
+        private string _defaultInstallationPath; 
+
         private OptionsSettingsMainTaskbarStyle _mainTaskbarStyleField; // Приватное поле для хранения объекта поднастроек основного стиля панели задач.
 
         private OptionsSettingsMaximizedTaskbarStyle _maximizedTaskbarStyleField;
@@ -75,6 +77,12 @@
         {
             get => this._wallpapperPath;
             set => this._wallpapperPath = value;
+        }
+
+        public string DefaultInstallationPath
+        {
+            get => this._defaultInstallationPath;
+            set => this._defaultInstallationPath = value;
         }
 
         public OptionsSettingsMainTaskbarStyle MainTaskbarStyle

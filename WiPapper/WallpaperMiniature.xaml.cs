@@ -1,8 +1,8 @@
-﻿using System.Net;
+﻿using System.IO;
+using System;
 using System.Windows;
 using System.Windows.Controls;
-using WiPapper.DB;
-using static WiPapper.MainWindow;
+using System.Threading.Tasks;
 
 namespace WiPapper
 {
@@ -18,13 +18,59 @@ namespace WiPapper
 
         private void DownloadButton_Click(object sender, RoutedEventArgs e)
         {
-            if (this.DataContext is ImageDetails imageDetails)            {
-                // Скачивание изображения по URL
-                using (var client = new WebClient())
+            if (!(Application.Current.MainWindow is MainWindow mainWindow)) return;
+
+            string folderPath = mainWindow.DefaultInstallationPath.Text;
+
+            if (string.IsNullOrEmpty(folderPath))
+            {
+                if (!Directory.Exists("Wallpapers"))
                 {
-                    //string fileName = System.IO.Path.GetFileName(customImage.ImageUrl);
-                    //client.DownloadFile(customImage.ImageUrl, fileName);
-                    //MessageBox.Show($"Изображение сохранено как {fileName}", "Скачивание завершено", MessageBoxButton.OK, MessageBoxImage.Information);
+                    Directory.CreateDirectory("Wallpapers");
+                }
+                folderPath = "Wallpapers";
+            }
+            else
+            {
+                folderPath = Directory.Exists(mainWindow.DefaultInstallationPath.Text) ? mainWindow.DefaultInstallationPath.Text :
+                                                                                         "Wallpapers";
+            }
+
+            DownloadWallpaper(folderPath, sender as Button);
+        }
+
+        private async void DownloadWallpaper(string folderPath, Button button)
+        {
+            await DownloadWallpaperAsync(folderPath, button.Tag.ToString());
+            MessageBox.Show("Обои успешно скачаны");
+        }
+
+        private async Task DownloadWallpaperAsync(string folderPath, string supabasePath)
+        {
+            var preview = await DB.DataBase._supabase.Storage.From("Wallpapers").List(supabasePath);
+
+            foreach (var prew in preview)
+            {
+                var fullPath = Path.Combine(folderPath, supabasePath, prew.Name);
+                var directory = Path.GetDirectoryName(fullPath);
+
+                if (!Directory.Exists(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+
+                if (!prew.IsFolder)
+                {
+                    var bytes = await DB.DataBase._supabase.Storage
+                        .From("Wallpapers")
+                        .Download($"{supabasePath}/{prew.Name}", null);
+
+                    File.WriteAllBytes(fullPath, bytes);
+                    Console.WriteLine($"Файл {fullPath} успешно скачан и сохранен.");
+                }
+                else if (prew.IsFolder)
+                {
+                    await DownloadWallpaperAsync(folderPath, $"{supabasePath}/{prew.Name}");
                 }
             }
         }

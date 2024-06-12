@@ -33,6 +33,8 @@ using System.Windows.Input;
 using Newtonsoft.Json;
 using Windows.System;
 using WiPapper.DB;
+using Newtonsoft.Json.Linq;
+using System.Runtime.InteropServices.ComTypes;
 
 
 //Получать высоту панели задач и передавать в браузер её + цвет панели чтобы на сайте можно было сделать визуализацию как будто от панели задач столбцы(подумал что можно без высоты и чтобы разработчики сами её писали)
@@ -52,7 +54,8 @@ namespace WiPapper
         readonly RegistryKey rkApp = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true); //Registry.CurrentUser = HKEY_CURRENT_USER
         NotifyIcon notifyIcon;
 
-        Session session;
+        DataBase dataBase = new DataBase();
+        
 
         #region wlp
         public static List<Rectangle> ScreenList;
@@ -94,17 +97,10 @@ namespace WiPapper
         {
             InitializeComponent();
 
-            DataContext = this;
-            //LoadImagesFromSupabase();
-
-            //Window1 window1 = new Window1();
-            //window1.Show();
-
-            //FillLists();
-
             InitializeNotifyIcon();
 
             SetHtmlWallpaper.StartHttpListener();
+
             /*
             * Check monitor numbers and put them in differents Arraylist  
             * // проверка кол-ва мониторов и помещение в разные массивы
@@ -120,10 +116,11 @@ namespace WiPapper
             */
 
 
-            DB.DataBase db = new DB.DataBase();
-            Task.Run(() => db.Start());
+            
+            dataBase.Start();
 
-
+            DataContext = this;
+            FillWallpapersContainer();
 
             FillLists();
 
@@ -133,6 +130,11 @@ namespace WiPapper
 
 
 
+        }
+
+        private async void FillWallpapersContainer()
+        {
+            WallpapersContainer.ItemsSource = await dataBase.LoadImageDetailsFromSupabase();
         }
 
         private void FillLists()
@@ -194,6 +196,7 @@ namespace WiPapper
             StartWhenLaunchedCheckBox.IsChecked = OptionsManager.Options.StartWhenLaunched;
             UseMaximizedSettingsCheckBox.IsChecked = OptionsManager.Options.UseDifferentSettingsWhenMaximized;
             StartWithWindowsCheckBox.IsChecked = OptionsManager.Options.StartWithWindows;
+            DefaultInstallationPath.Text = OptionsManager.Options.Settings.DefaultInstallationPath;
 
             try
             {
@@ -204,6 +207,7 @@ namespace WiPapper
 
         private void SaveSettings() // Метод для сохранения настроек  //тут сохраняются настройки приложения поэтому надо перенести место сохранения (сохранять не в TaskBarOptions) или переименовать TaskBarOptions тк там все сохраняется или хуй знает
         {
+            OptionsManager.Options.Settings.DefaultInstallationPath = DefaultInstallationPath.Text ?? string.Empty;
             OptionsManager.Options.Settings.WallpapperPath = fileMedia?.ToString();
             OptionsManager.Options.ChooseAFitComboBoxIndex = (byte)WallpaperStretchTypeComboBox.SelectedIndex;
 
@@ -265,7 +269,7 @@ namespace WiPapper
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(ex.Message, "Failed to Set Registry Key");  //исправить на русский
+                System.Windows.MessageBox.Show(ex.Message, "Не удалось установить ключ реестра");  //исправить на русский
             }
         }
 
@@ -706,9 +710,11 @@ namespace WiPapper
             {
                 StartStopButton.Content = "Остановить";
                 RunApplyTask = true;
+                FindTaskbarHandles = true;
 
                 ApplyTask = new Task(() => ApplyToAllTaskbars()); // Создание и запуск задачи ApplyToAllTaskbars
                 ApplyTask.Start();
+
             }
         }
         #endregion
@@ -718,18 +724,17 @@ namespace WiPapper
 
 
 
-        private async void Button_Click(object sender, RoutedEventArgs e)
+        private async void LoginButton_Click(object sender, RoutedEventArgs e)
         {
             string email = AutorizationEmailTextBox.Text;
             string password = AutorizationPasswordTextBox.Password;
 
             try
             {
-                session = await DB.DataBase._supabase.Auth.SignIn(email, password);
+                DataBase.session = await DataBase._supabase.Auth.SignIn(email, password);
 
-                if (session != null)
+                if (DataBase.session != null)
                 {
-                    System.Windows.MessageBox.Show("Успешный вход!", "Авторизация", MessageBoxButton.OK, MessageBoxImage.Information);
                     AccountTabControl.Visibility = Visibility.Collapsed;
                     UserAutorizedPanel.Visibility = Visibility.Visible;
                 }
@@ -751,6 +756,10 @@ namespace WiPapper
             }
         }
 
+
+
+
+
         private async void CreateAccountButton_Click(object sender, RoutedEventArgs e)
         {// в другой метод
             string name = RegisterNameTextBox.Text;
@@ -763,223 +772,191 @@ namespace WiPapper
             }
             else
             {
-                session = await DB.DataBase._supabase.Auth.SignUp(email, password);
+                //заменить
+
+                DataBase.session = await DataBase._supabase.Auth.SignUp(email, password);
 
                 var model = new UserInfo
                 {
-                    Id = session.User.Id,
+                    Id = DataBase.session.User.Id,
                     Name = name,
                 };
+                await DataBase._supabase.From<UserInfo>().Insert(model);
 
-                await DB.DataBase._supabase.From<UserInfo>().Insert(model);
+                AccountTabControl.Visibility = Visibility.Collapsed;
+                UserAutorizedPanel.Visibility = Visibility.Visible;
             }
 
             RegisterNameTextBox.Text = null;
             RegisterEmailTextBox.Text = null;
             RegisterPasswordBox.Password = null;
-
         }
 
-        [Table("client")]//
-        class UserInfo:BaseModel
-        {
-            [Column("id")]
-            public string Id { get; set; }
-
-            [Column("name")]
-            public string Name { get; set; }
-
-            [Column("URLToWallpaper")]
-            public string[] urlToWallpaper { get; set; }
-        }
-
-
-
-        private void LoadImagesFromSupabase() //
-        {
-            //// Пример кода для получения изображений из Supabase и добавления их в коллекцию Images
-            //Images = new ObservableCollection<CustomImage>
-            //{
-            //    new CustomImage { ImageUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSXqPjgMIQB8GV-Jm4yUMtRTHN5F6vc0WTzAA&s", ImageDescription = "Описание 1" },
-            //    new CustomImage { ImageUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSXqPjgMIQB8GV-Jm4yUMtRTHN5F6vc0WTzAA&s", ImageDescription = "Описание 2" }
-            //    // Добавьте больше изображений
-            //};
-
-            //ImagesContainer.ItemsSource = Images;
-        }
-
-
-
-
-
-        public class CustomImage
-        {
-            private string _imageUrl;
-            public string ImageUrl
-            {
-                get { return _imageUrl; }
-                set
-                {
-                    _imageUrl = value;
-                }
-            }
-
-            private string _imageDescription;
-            public string ImageDescription
-            {
-                get { return _imageDescription; }
-                set
-                {
-                    _imageDescription = value;
-                }
-            }
-        }
-
-
-
-
-
-
-
-
+        
 
 
 
 
 
         private async void UploadButton_Click(object sender, RoutedEventArgs e)
-        {//
+        {
+            await UploadWallpapers();
+            FillWallpapersContainer();
+        }
+
+        private async Task UploadWallpapers()
+        {
             try
             {
-                // Сделать проверку(а может и не надо) по id есть ли у пользователя UrlTOwallp и добавить еще ссылку(DB.DataBase._supabase.Storage.Url (+ название папки которое выбрали (в БД должна сама создаться)))
-                
-                
-                //в UrlTOwallp получить название папок и таким образом я смогу указать создателя обоев (потом при скачивании будут конфликты из за одинаковых имен)
-
-                string folderPath;
-
                 using (var folderDialog = new FolderBrowserDialog())
                 {
-                    switch (folderDialog.ShowDialog())
+                    if (folderDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                     {
-                        case System.Windows.Forms.DialogResult.OK:
-                            folderPath = folderDialog.SelectedPath;
+                        MyGrid.IsEnabled = false;
+                        string folderPath = folderDialog.SelectedPath;
+                        string rootFolderName = Path.GetFileName(folderPath);
+                        Guid userId = Guid.Parse(DataBase.session.User.Id);
 
-                            string[] files = Directory.GetFiles(folderPath);
+                        long maxSize = 30 * 1024 * 1024;
+                        long folderSize = GetDirectorySize(folderPath);
+                        if (maxSize > folderSize)
+                        {
+                            await UploadFolderAsync(folderPath, rootFolderName, userId);
+                            System.Windows.MessageBox.Show("Все файлы успешно загружены.");
+                        }
+                        else
+                        {
+                            System.Windows.MessageBox.Show($"Размер папки превышает максимальный размер и не будет загружен.");
+                        }
 
-                            foreach (string file in files)
-                            {
-                                string fileName = Path.GetFileName(file);
-                                var asdds = await DB.DataBase._supabase.Storage
-                                    .From($"Wallpapers/{Path.GetFileName(folderPath)}")
-                                    .Upload(file, fileName, onProgress: (s, progress) => Debug.WriteLine($"{progress}%"));
-
-                                var asd = DB.DataBase._supabase.Storage;
-                                if (file.Contains("preview"))
-                                {
-                                    var publicUrl = DB.DataBase._supabase.Storage.From("Wallpapers").GetPublicUrl($"{Path.GetFileName(folderPath)}/{Path.GetFileName(file)}"); //ссылку до preview а папку из ссылки этой 
-
-                                    var result = await DB.DataBase._supabase.Rpc("append_to_array", new { idd = Guid.Parse(session.User.Id), newelement = publicUrl });
-                                }
-                                Console.WriteLine();
-                            }
-                            break;
-                        case System.Windows.Forms.DialogResult.Cancel:
-                            break;
-                        default:
-                            break;
-
+                        MyGrid.IsEnabled = true;
                     }
                 }
             }
             catch (Exception ex)
             {
                 System.Windows.MessageBox.Show(ex.ToString());
-                
             }
-
-
-
-
-
         }
 
-        public async void DownloadButton_Click(object sender, RoutedEventArgs e)
-        {//
-            string folderPath = null;
 
-            if (string.IsNullOrEmpty(DownloadPath.Text))
+        private async Task UploadFolderAsync(string localFolderPath, string supabaseFolderPath, Guid userId)
+        {
+            string[] preview = Directory.GetFiles(localFolderPath, "preview.*", SearchOption.TopDirectoryOnly);
+            if (preview.Length == 0)
             {
-                if (!Directory.Exists("Wallpapers"))
-                {
-                    Directory.CreateDirectory("Wallpapers");
-
-                }
-                folderPath = "Wallpapers";
-            }
-            else
-            {
-                folderPath = Directory.Exists(DownloadPath.Text) ?
-                    DownloadPath.Text :
-                    "Wallpapers";
+                System.Windows.MessageBox.Show("Добавте превью в папку с обоями");
+                return;
             }
 
+            var files = Directory.GetFiles(localFolderPath);
+            var directories = Directory.GetDirectories(localFolderPath);
 
-
-
-            
-
-
-
-
-            var result = await DB.DataBase._supabase  //туть для квадратиков
-                                      .From<UserInfo>()
-                                      .Select(x => new object[] {x.urlToWallpaper})
-                                      .Where(x => x.Id == session.User.Id)
-                                      .Get();
-
-
-            var content = JsonConvert.DeserializeObject<List<Dictionary<string, List<string>>>>(result.Content);
-
-            if (content.Count > 0 && content[0].ContainsKey("URLToWallpaper") && content[0]["URLToWallpaper"].Count > 0)
+            // Загрузка файлов в текущей папке
+            foreach (var file in files)
             {
-                foreach (var item in content[0]["URLToWallpaper"])
-                {
-                    string directory = Path.GetFileName(Path.GetDirectoryName(item));
+                string fileName = Path.GetFileName(file);
+                var response = await DataBase._supabase.Storage
+                    .From($"Wallpapers/{supabaseFolderPath}")
+                    .Upload(file, fileName, null); //onProgress: (s, progress) => Debug.WriteLine($"{progress}%")
 
-                    ImageDetails imageDetails = new ImageDetails
-                    {
-                        ImageDescription = directory,
-                        ImageUrl = item
-                    };
+                if (file.Contains("preview"))
+                {
+                    var publicUrl = DataBase._supabase.Storage
+                        .From("Wallpapers")
+                        .GetPublicUrl($"{supabaseFolderPath}/{fileName}");
+
+                    var result = await DataBase._supabase.Rpc("append_to_array", new { idd = userId, newelement = publicUrl });
                 }
             }
 
-
-
-
-
-
-            var objects = await DB.DataBase._supabase.Storage.From("Wallpapers").List();  //папки (надо сделать если в папке будут папки)  //скачивание
-
-            foreach(var obj  in objects)
+            // Рекурсивная обработка подкаталогов
+            foreach (var directory in directories)
             {
-                var preview = await DB.DataBase._supabase.Storage.From("Wallpapers").List($"{obj.Name}");// файлы в папке
-
-                foreach (var prew in preview)
-                {
-                    var bytes = await DB.DataBase._supabase.Storage
-                      .From("Wallpapers")
-                      .Download($"{obj}/{prew.Name}", (s, progress) => Debug.WriteLine($"{progress}%")); // убрать прогресс
-
-
-                    System.IO.File.WriteAllBytes($"{folderPath}/{obj.Name}", bytes);
-
-                    Console.WriteLine(bytes);
-                }
+                string folderName = Path.GetFileName(directory);
+                await UploadFolderAsync(directory, $"{supabaseFolderPath}/{folderName}", userId);
             }
-
-
         }
+
+        public static long GetDirectorySize(string folderPath)
+        {
+            DirectoryInfo dirInfo = new DirectoryInfo(folderPath);
+
+            long size = 0;
+            // Add file sizes.
+            FileInfo[] fis = dirInfo.GetFiles();
+            foreach (FileInfo fi in fis)
+            {
+                size += fi.Length;
+            }
+            // Add subdirectory sizes.
+            DirectoryInfo[] dis = dirInfo.GetDirectories();
+            foreach (DirectoryInfo di in dis)
+            {
+                size += GetDirectorySize(di.FullName);
+            }
+            return size;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        //public async void DownloadButton_Click(object sender, RoutedEventArgs e)
+        //{// это должно быть в загрузке настроек DownloadPath.Text = ,,,
+        //    string folderPath = DownloadPath.Text;
+
+        //    if (string.IsNullOrEmpty(folderPath))
+        //    {
+        //        if (!Directory.Exists("Wallpapers"))
+        //        {
+        //            Directory.CreateDirectory("Wallpapers");
+        //        }
+        //        folderPath = "Wallpapers";
+        //    }
+        //    else
+        //    {
+        //        folderPath = Directory.Exists(DownloadPath.Text) ? DownloadPath.Text :
+        //                                                           "Wallpapers";
+        //    }
+
+        //    var objects = await DataBase._supabase.Storage.From("Wallpapers").List();  //папки (надо сделать если в папке будут папки)  //скачивание
+
+        //    foreach (var obj in objects)
+        //    {
+        //        var preview = await DataBase._supabase.Storage.From("Wallpapers").List($"{obj.Name}");// файлы в папке
+
+        //        foreach (var prew in preview)
+        //        {
+        //            var bytes = await DataBase._supabase.Storage
+        //              .From("Wallpapers")
+        //              .Download($"{obj}/{prew.Name}", null); // убрать прогресс (s, progress) => Debug.WriteLine($"{progress}%")
+
+        //            System.IO.File.WriteAllBytes($"{folderPath}/{obj.Name}", bytes);
+
+        //            Console.WriteLine(bytes);
+        //        }
+        //    }
+        //}
     }
 }

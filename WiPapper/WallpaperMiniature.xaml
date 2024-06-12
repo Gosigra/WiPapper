@@ -3,18 +3,20 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:materialDesign2="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:local="clr-namespace:WiPapper"
              mc:Ignorable="d" MinHeight="210" MinWidth="210" MaxWidth="210" MaxHeight="210">
 
     <Grid Background="White">
-        <Image Source="{Binding ImageUrl}" VerticalAlignment="Top"/>
+        <Image Source="{Binding PreviewUrl}" VerticalAlignment="Top"/>
         <Grid Height="50" VerticalAlignment="Bottom" Background="Black" Opacity="0.6" IsEnabled="True">
-            <TextBlock Margin="0 0 50 0" Text="{Binding ImageDescription}" FontSize="20" Opacity="1" Foreground="White" TextAlignment="Center" VerticalAlignment="Center"/>
-
-            <Button VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0 0 10 0" Width="30" Height="30" Opacity="1" Style="{StaticResource MaterialDesignFlatButton}" Click="DownloadButton_Click">
+            <WrapPanel Orientation="Vertical" VerticalAlignment="Center" Margin="0 0 50 0">
+                <TextBlock Width="160" Text="{Binding WallpaperName}" FontSize="20" Opacity="1" Foreground="LightGray" VerticalAlignment="Center" Padding="10 0 0 0"/>
+                <TextBlock Width="160" Height="15" Text="{Binding WallpaperAutor}" FontSize="10" Opacity="1" Foreground="Gray" VerticalAlignment="Center" Margin="0 -3 0 0" Padding="10 0 0 0"/>
+            </WrapPanel>
+            <Button VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0 0 10 0" Width="30" Height="30" Opacity="1" Style="{StaticResource MaterialDesignFlatButton}" Tag="{Binding WallpaperName}" Click="DownloadButton_Click">
                 <Button.Content>
-                    <materialDesign2:PackIcon Kind="ArrowDownBoldOutline" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="-14 0 -11 0" Width="30" Height="30" Foreground="White"/>
+                    <materialDesign:PackIcon Kind="ArrowDownBoldOutline" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="-14 0 -11 0" Width="30" Height="30" Foreground="LightGray"/>
                 </Button.Content>
             </Button>
         </Grid>

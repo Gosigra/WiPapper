@@ -13,6 +13,8 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
         public static bool UsePowerMethod { get; set; }
         public static ChromiumWebBrowser Browser { get; set; }
         public static string FilePath { get; set; }
+        public static bool ShowDevTools {  get; set; }
+        public static bool RecordAudio { get; set; }
 
         public static void SetBrowserAsWallpaper(Window windowList)
         {
@@ -49,9 +51,9 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
                         await ProcessResponse(requestRezult, response);
                     }
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    //MessageBox.Show(ex.ToString());
+                    MessageBox.Show(ex.ToString());
                 }
             }
         }
@@ -63,12 +65,18 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
 
             switch (requestedFile)
             {
-                //case "/Use"
+                case "/ShowDevTools":
+                    ShowDevTools = true;
+                    break;
                 case "/UsePowerMethod":
                     UsePowerMethod = true;
                     break;
                 case "/UseStereoRecord":
                     AudioProcessor.Channels = 2;
+                    //AudioProcessor.ChangeWaweFormat();
+                    break;
+                case "/RecordAudio":
+                    RecordAudio = true;
                     break;
                 case "/":
                     filePath = FilePath + "/index.html";

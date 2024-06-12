@@ -1,31 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace WiPapper.DB
+﻿namespace WiPapper.DB
 {
     public class ImageDetails
     {
-        private string _imageUrl;
-        public string ImageUrl
+        private string _previewUrl;
+        private string _wllpaperName;
+        private string _wllpaperAutor;
+
+        public string PreviewUrl
         {
-            get { return _imageUrl; }
-            set
-            {
-                _imageUrl = value;
-            }
+            get => _previewUrl;
+            set => _previewUrl = value;
         }
 
-        private string _imageDescription;
-        public string ImageDescription
+        public string WallpaperName
         {
-            get { return _imageDescription; }
-            set
-            {
-                _imageDescription = value;
-            }
+            get => _wllpaperName;
+            set => _wllpaperName = value;
         }
+
+        public string WallpaperAutor
+        {
+            get => _wllpaperAutor;
+            set => _wllpaperAutor = value;
+        }
+
     }
 }

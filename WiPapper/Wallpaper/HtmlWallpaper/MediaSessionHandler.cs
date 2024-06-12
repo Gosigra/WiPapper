@@ -24,21 +24,36 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
 
             sessionManager.CurrentSessionChanged += SessionManager_CurrentSessionChanged; // работает между разными приложениями
             SetHtmlWallpaper.Browser.FrameLoadEnd += Browser_FrameLoadEnd;
-
-            //SetHtmlWallpaper.Browser.ShowDevTools();// убрать или сделать для разработчиков
+            
             UpdateSession(session);
+        }
+
+        private static void ShowDevTools()
+        {
+            try
+            {
+                if (SetHtmlWallpaper.ShowDevTools)
+                {
+                    SetHtmlWallpaper.Browser.ShowDevTools();
+                }
+
+                if (SetHtmlWallpaper.RecordAudio)
+                {
+                    AudioProcessor.RecordAudioData();
+                }
+            }
+            catch { }
         }
 
         private static void Browser_FrameLoadEnd(object sender, FrameLoadEndEventArgs args)
         {
             if (args.Frame.IsMain)
             {
+                ShowDevTools();
 
-                AudioProcessor.RecordAudioData();
-                //await RecordAudioData();
+                //AudioProcessor.RecordAudioData();
 
-
-                SetHtmlWallpaper.Browser.ShowDevTools();
+                //SetHtmlWallpaper.Browser.ShowDevTools();
 
                 Application.Current.Dispatcher.Invoke(() =>
                 {

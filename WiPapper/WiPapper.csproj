@@ -101,6 +101,7 @@
     <Compile Include="AppOptions\OptionsManager.cs" />
     <Compile Include="DB\DataBase.cs" />
     <Compile Include="DB\ImageDetails.cs" />
+    <Compile Include="DB\UserInfo.cs" />
     <Compile Include="TaskBar\Extensions.cs" />
     <Compile Include="TaskBar\Globals.cs" />
     <Compile Include="TaskBar\Taskbar.cs" />
