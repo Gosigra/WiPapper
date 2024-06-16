@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace WiPapper.AppOptions
 {
@@ -29,13 +29,11 @@ namespace WiPapper.AppOptions
                     Directory.CreateDirectory(Path.GetDirectoryName(FilePath));
                 }
 
-                using (StreamWriter file = File.CreateText(FilePath)) // Открытие StreamWriter для записи в файл Options.xml. Файл будет создан или перезаписан (если существует).
+                using (FileStream fstream = new FileStream(FilePath, FileMode.Create)) //Открытие FileStream для записи в файл Options.xml. Файл будет создан или перезаписан (если существует).
                 {
-                    JsonSerializer serializer = new JsonSerializer();
-                    serializer.Formatting = Formatting.Indented; // Для отступов и форматирования
-                    serializer.Serialize(file, Options); // Сериализация объекта Options и запись его в файл
+                    // Сериализуем объект в JSON и записываем в файл    //Сериализация объекта Options и запись его в файл. Сериализация(грубо говоря архивирование)
+                    JsonSerializer.Serialize(fstream, Options, new JsonSerializerOptions { WriteIndented = true });
                 }
-
             }
             catch (Exception) //Если произошло исключение при сохранении настроек, метод возвращает false.
             {
@@ -50,13 +48,11 @@ namespace WiPapper.AppOptions
 
             try
             {
-                using (StreamReader file = File.OpenText(FilePath)) // Открытие StreamReader для чтения из файла Options.xml.
+                using (FileStream reader = new FileStream(FilePath, FileMode.Open)) //Открытие FileStream для чтения из файла Options.xml.
                 {
-                    JsonSerializer serializer = new JsonSerializer();
-                    Options = (Options)serializer.Deserialize(file, typeof(Options)); // Десериализация содержимого файла в объект Options.
+                    Options = JsonSerializer.Deserialize<Options>(reader);  // Десериализация содержимого файла в объект Options.
+                                                                            //мы ожидаем десериализацию JSON-данных в объект типа Settings
                 }
-
-
             }
             catch (Exception ex) //Если произошло исключение при загрузке настроек, выводится сообщение об ошибке в консоль, и метод возвращает false.
             {

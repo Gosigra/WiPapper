@@ -17,16 +17,8 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
 
         public static void SetBrowserAsWallpaper(Window windowList)
         {
-            //CefSettings settings = new CefSettings();
-            //settings.CefCommandLineArgs.Add("allow-file-access-from-files");
-            //settings.CefCommandLineArgs.Add("allow-universal-access-from-files");
-            //Cef.Initialize(settings);
-            //Browser.BrowserSettings
-
-
             Browser = new ChromiumWebBrowser("http://localhost:8723");
             windowList.Content = Browser;
-
             Browser.IsBrowserInitializedChanged += MediaSessionHandler.IsBrowserInitialized;
         }
 
@@ -35,7 +27,6 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
             HttpListener listener = new HttpListener();
             listener.Prefixes.Add("http://localhost:8723/");
             listener.Start();
-
             while (true)
             {
                 try
@@ -72,7 +63,6 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
                     break;
                 case "/UseStereoRecord":
                     AudioProcessor.Channels = 2;
-                    //AudioProcessor.ChangeWaweFormat();
                     break;
                 case "/RecordAudio":
                     RecordAudio = true;

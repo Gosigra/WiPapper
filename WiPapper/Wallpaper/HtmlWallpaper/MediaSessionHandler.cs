@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using CefSharp;
 using CefSharp.Wpf;
+using Newtonsoft.Json;
 using Windows.Media.Control;
 using Windows.Storage.Streams;
 
@@ -13,22 +14,20 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
     {
         private static string oldThumbnailUrl;
         private static readonly MediaProperties mediaProperties = new MediaProperties();
-        private static readonly PlaybackInfo playbackInfo = new PlaybackInfo();
         private static GlobalSystemMediaTransportControlsSession session;
         static GlobalSystemMediaTransportControlsSessionManager sessionManager = null;
 
         public static void IsBrowserInitialized(object sender, DependencyPropertyChangedEventArgs e)
         {
             sessionManager = GlobalSystemMediaTransportControlsSessionManager.RequestAsync().GetAwaiter().GetResult();
-            GlobalSystemMediaTransportControlsSession session = sessionManager.GetCurrentSession();
-
-            sessionManager.CurrentSessionChanged += SessionManager_CurrentSessionChanged; // работает между разными приложениями
+            sessionManager.CurrentSessionChanged += SessionManager_CurrentSessionChanged;
             SetHtmlWallpaper.Browser.FrameLoadEnd += Browser_FrameLoadEnd;
-            
+
+            GlobalSystemMediaTransportControlsSession session = sessionManager.GetCurrentSession();
             UpdateSession(session);
         }
 
-        private static void ShowDevTools()
+        private static void ManageExtendedFunctionality()
         {
             try
             {
@@ -49,17 +48,9 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
         {
             if (args.Frame.IsMain)
             {
-                ShowDevTools();
+                ManageExtendedFunctionality();
 
-                //AudioProcessor.RecordAudioData();
-
-                //SetHtmlWallpaper.Browser.ShowDevTools();
-
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    //SetHtmlWallpaper.browser.ExecuteScriptAsync("updateInfo", mediaProperties.Artist, mediaProperties.Title, mediaProperties.ThumbnailURL);
-                    UpdateInfo();
-                });
+                Application.Current.Dispatcher.Invoke(() => UpdateInfo());
             }
         }
 
@@ -77,7 +68,6 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
             if (session != null)
             {
                 session.MediaPropertiesChanged -= Session_MediaPropertiesChanged;
-                session.PlaybackInfoChanged -= Session_PlaybackInfoChanged;
             }
 
             // Обновление объекта session и подписка на событие нового объекта session
@@ -85,7 +75,6 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
             if (session != null)
             {
                 session.MediaPropertiesChanged += Session_MediaPropertiesChanged;
-                session.PlaybackInfoChanged += Session_PlaybackInfoChanged;
             }
         }
 
@@ -94,35 +83,17 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
             UpdateDetails();
         }
 
-        private static void Session_PlaybackInfoChanged(GlobalSystemMediaTransportControlsSession session, PlaybackInfoChangedEventArgs args)
-        {
-            UpdateControls();
-        }
-
         private static void UpdateInfo()
         {
             if (session == null) return;
 
-            UpdateControls();
             UpdateDetails();
         }
 
-        private static void UpdateControls() // состояние медиа (пауза и тд) не надо наверное
-        {
-            if (session == null) return;
-            var playback = session.GetPlaybackInfo();
-
-            if (playback == null) return;
-
-            playbackInfo.IsPlaying = playback.PlaybackStatus.ToString();
-            Console.WriteLine(playback.PlaybackStatus);
-        }
-
-        private static async void UpdateDetails() // информация о медиа
+        private static async void UpdateDetails()
         {
             if (session == null)
                 return;
-
             GlobalSystemMediaTransportControlsSessionMediaProperties properties;
             try
             {
@@ -134,7 +105,6 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
             }
             if (properties == null)
                 return;
-
             mediaProperties.AlbumArtist = properties.AlbumArtist;
             mediaProperties.AlbumTitle = properties.AlbumTitle;
             mediaProperties.AlbumTrackCount = properties.AlbumTrackCount;
@@ -145,7 +115,6 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
             mediaProperties.ThumbnailURL = await GetThumbnailAsBase64String(properties.Thumbnail);
             mediaProperties.Title = properties.Title;
             mediaProperties.TrackNumber = properties.TrackNumber;
-
             UpdateWebView();
         }
 
@@ -169,19 +138,20 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
             return base64String;
         }
 
-        private static void UpdateWebView() //Отправка данных о медиа (Title, Artist и тд.).
+        private static void UpdateWebView()
         {
             if (mediaProperties.ThumbnailURL == oldThumbnailUrl) return;
 
-            for (int i = 0; i < MainWindow.windowList.Count; i++)
+            for (int i = 0; i < MainWindow.WindowList.Count; i++)
             {
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     if (SetHtmlWallpaper.Browser.IsLoaded)
                     {
-                        ChromiumWebBrowser browser = MainWindow.windowList[i].Content as ChromiumWebBrowser;
-                        browser.ExecuteScriptAsync("updateInfo", mediaProperties.Artist, mediaProperties.Title, mediaProperties.ThumbnailURL); //Добавить отправку всего.                        
-                        oldThumbnailUrl = mediaProperties.ThumbnailURL ?? string.Empty; // проверить
+                        ChromiumWebBrowser browser = MainWindow.WindowList[i].Content as ChromiumWebBrowser;
+                        string jsonMediaProperties = JsonConvert.SerializeObject(mediaProperties);
+                        browser.ExecuteScriptAsync("updateInfo", jsonMediaProperties);
+                        oldThumbnailUrl = mediaProperties.ThumbnailURL ?? string.Empty;
                     }
                 });
             }

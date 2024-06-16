@@ -71,7 +71,6 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup />
-  <PropertyGroup />
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
@@ -114,7 +113,6 @@
     <Compile Include="Wallpaper\HtmlWallpaper\HtmlWallpaperSetter.cs" />
     <Compile Include="Wallpaper\HtmlWallpaper\MediaProperties.cs" />
     <Compile Include="Wallpaper\HtmlWallpaper\MediaSessionHandler.cs" />
-    <Compile Include="Wallpaper\HtmlWallpaper\PlaybackInfo.cs" />
     <Compile Include="Window1.xaml.cs">
       <DependentUpon>Window1.xaml</DependentUpon>
     </Compile>
@@ -191,6 +189,9 @@
     </PackageReference>
     <PackageReference Include="Supabase">
       <Version>1.0.3</Version>
+    </PackageReference>
+    <PackageReference Include="System.Text.Json">
+      <Version>8.0.3</Version>
     </PackageReference>
     <PackageReference Include="Vanara.PInvoke.User32">
       <Version>4.0.1</Version>

@@ -59,14 +59,14 @@ namespace WiPapper
 
         #region wlp
         public static List<Rectangle> ScreenList;
-        public static List<Window> windowList;
-        public static List<MediaElement> mediaList;
+        public static List<Window> WindowList;
+        public static List<MediaElement> MediaList;
 
         public static HWND workerw;
 
-        public static Uri fileMedia;
+        public static Uri WallpaperPath;
 
-        public static bool currentlyPlaying = false;
+        public static bool currentlySet = false;
         #endregion
 
         #region Declarations TB
@@ -140,18 +140,16 @@ namespace WiPapper
         private void FillLists()
         {
             ScreenList = new List<Rectangle>();
-            windowList = new List<Window>();
-            mediaList = new List<MediaElement>();
-
+            WindowList = new List<Window>();
+            MediaList = new List<MediaElement>();
             foreach (var item in Screen.AllScreens)
             {
                 ScreenList.Add(item.Bounds);                                                                                                 //получаю рабочий стол и его рабочую область ({X = 0 Y = 0 Width = 1920 Height = 1040}) //working area
             }
-
             for (int i = 0; i < ScreenList.Count; i++)
             {
-                windowList.Add(new Window());                                                                                                                //здесь кол-во экранов
-                mediaList.Add(new MediaElement());
+                WindowList.Add(new Window());                                                                                                                //здесь кол-во экранов
+                MediaList.Add(new MediaElement());
             }
         }
 
@@ -200,7 +198,7 @@ namespace WiPapper
 
             try
             {
-                fileMedia = new Uri(OptionsManager.Options.Settings.WallpapperPath);
+                WallpaperPath = new Uri(OptionsManager.Options.Settings.WallpapperPath);
             }
             catch{} //что то сделать
         }
@@ -208,7 +206,7 @@ namespace WiPapper
         private void SaveSettings() // Метод для сохранения настроек  //тут сохраняются настройки приложения поэтому надо перенести место сохранения (сохранять не в TaskBarOptions) или переименовать TaskBarOptions тк там все сохраняется или хуй знает
         {
             OptionsManager.Options.Settings.DefaultInstallationPath = DefaultInstallationPath.Text ?? string.Empty;
-            OptionsManager.Options.Settings.WallpapperPath = fileMedia?.ToString();
+            OptionsManager.Options.Settings.WallpapperPath = WallpaperPath?.ToString();
             OptionsManager.Options.ChooseAFitComboBoxIndex = (byte)WallpaperStretchTypeComboBox.SelectedIndex;
 
             OptionsManager.Options.StartMinimized = StartMinimizedCheckBox.IsChecked ?? false;
@@ -276,11 +274,11 @@ namespace WiPapper
         {
             notifyIcon.Visible = false;
 
-            if (mediaList != null)
+            if (MediaList != null)
             {
                 //media[i].Stop();
                 //mediaList = null;
-                foreach (Window window in windowList)
+                foreach (Window window in WindowList)
                 {
                     window.Close();
                 }
@@ -309,58 +307,52 @@ namespace WiPapper
         #region Wallpaper
         private void SetMediaAsWallpaper(Window windowList, int i)
         {
-            mediaList[i] = new MediaElement();
+            MediaList[i] = new MediaElement();
             Grid grid = new Grid();
             windowList.Content = grid;
-            grid.Children.Add(mediaList[i]);
+            grid.Children.Add(MediaList[i]);
 
-            mediaList[i].Source = fileMedia;
-            mediaList[i].LoadedBehavior = MediaState.Manual;
-            mediaList[i].Volume = 0;
+            MediaList[i].Source = WallpaperPath;
+            MediaList[i].LoadedBehavior = MediaState.Manual;
+            MediaList[i].Volume = 0;
 
-            mediaList[i].MediaEnded += (send, eArgs) =>
+            MediaList[i].MediaEnded += (send, eArgs) =>
             {
-                mediaList[i].Position = new TimeSpan(0, 0, 1);
-                mediaList[i].Play();
+                MediaList[i].Position = new TimeSpan(0, 0, 1);
+                MediaList[i].Play();
             };
-            mediaList[i].Play();
-            currentlyPlaying = true;
+            MediaList[i].Play();
+            currentlySet = true;
         }
 
         private void UnSetWall()
         {
-            if (currentlyPlaying)
+            if (currentlySet)
             {
                 //media?.Stop();
                 //mediaList = null;
-                foreach (Window window in windowList)
+                foreach (Window window in WindowList)
                 {
                     window.Close();
                 }
 
-                currentlyPlaying = false;
+                currentlySet = false;
             }
         }
 
         public static void FindWorkerWindow()
         {
             HWND progMan = User32.FindWindow("ProgMan", null);
-
             IntPtr result = IntPtr.Zero;
-
             User32.SendMessageTimeout(progMan, 0x052C, new IntPtr(0), IntPtr.Zero, User32.SMTO.SMTO_NORMAL, 1000, ref result);
-
             workerw = IntPtr.Zero;
-
             User32.EnumWindows(new User32.EnumWindowsProc((tophandle, intPtr) =>
             {
                 HWND p = User32.FindWindowEx(tophandle, IntPtr.Zero, "SHELLDLL_DefView", null);
-
                 if (p != IntPtr.Zero)
                 {
                     workerw = User32.FindWindowEx(IntPtr.Zero, tophandle, "WorkerW", null);
                 }
-
                 return true;
             }), IntPtr.Zero);
         }
@@ -377,7 +369,7 @@ namespace WiPapper
             {
                 case System.Windows.Forms.DialogResult.OK:
                     //file = fileDialog.FileName;
-                    fileMedia = new Uri(fileDialog.FileName);
+                    WallpaperPath = new Uri(fileDialog.FileName);
                     SetWallpaperButton.IsEnabled = true;
                     break;
                 case System.Windows.Forms.DialogResult.Cancel:
@@ -389,25 +381,81 @@ namespace WiPapper
             }
         }
 
+        //private void SetWallpaperButton_Click(object sender, RoutedEventArgs e)
+        //{
+        //    FindWorkerWindow();
+
+        //    if (fileMedia == null)
+        //    {
+        //        SetWallpaperButton.IsEnabled = false;
+        //        return;
+        //    }
+        //    if (currentlyPlaying)
+        //    {
+        //        UnSetWall();
+        //    }
+
+        //    for (int i = 0; i < WindowList.Count; i++) // можно цикл убрать и сделать для 1 монитора иначе потом для не 1го монитора надо асинхронность
+        //    {
+        //        //Window window = new Window(); //сделать одно окно
+
+        //        WindowList[i] = new Window
+        //        {
+        //            WindowStyle = WindowStyle.None,
+        //            AllowsTransparency = true,
+
+        //            Top = ScreenList[i].Top,
+        //            Left = ScreenList[i].Left,
+        //            Width = ScreenList[i].Width,
+        //            Height = ScreenList[i].Height
+        //        };
+
+        //        WindowList[i].Initialized += new EventHandler((s, ea) =>
+        //        {
+        //            if (fileMedia.AbsolutePath.Contains("index.html"))
+        //            {
+        //                //метод 1 - (сделать проверки для всякого (например нужно ли запись включать и тд (проверить что будет если не обявить функцию (то есть код будет проверять какие функции есть в обоях при ошибке = false, значит метод не будет работать)))+ можно асинхронность но потом под конец(сначала главное чтобы работало))
+        //                SetHtmlWallpaper.FilePath = Path.GetDirectoryName(fileMedia.LocalPath);
+        //                SetHtmlWallpaper.SetBrowserAsWallpaper(WindowList[i]);
+
+        //                currentlyPlaying = true;
+        //            }
+        //            else
+        //            {
+        //                //метод 2-в него то что ниже
+        //                SetMediaAsWallpaper(WindowList[i], i);
+
+        //                currentlyPlaying = true;
+        //            }
+
+        //            HWND windowHandle = new WindowInteropHelper(WindowList[i]).Handle;
+        //            User32.SetParent(windowHandle, workerw);
+        //        });
+        //        WindowList[i].UpdateLayout();
+        //        WindowList[i].Show();
+        //        WallpaperStretchTypeComboBox_SelectionChanged(null, null);
+        //    }
+        //}
+
         private void SetWallpaperButton_Click(object sender, RoutedEventArgs e)
         {
             FindWorkerWindow();
-
-            if (fileMedia == null)
-            {
+            if (WallpaperPath == null)            {
                 SetWallpaperButton.IsEnabled = false;
                 return;
             }
-            if (currentlyPlaying)
+            if (currentlySet)
             {
                 UnSetWall();
             }
+            InitializeWindows();
+        }
 
-            for (int i = 0; i < windowList.Count; i++) // можно цикл убрать и сделать для 1 монитора иначе потом для не 1го монитора надо асинхронность
+        private void InitializeWindows()
+        {
+            for (int i = 0; i < WindowList.Count; i++)
             {
-                //Window window = new Window(); //сделать одно окно
-
-                windowList[i] = new Window
+                WindowList[i] = new Window
                 {
                     WindowStyle = WindowStyle.None,
                     AllowsTransparency = true,
@@ -417,33 +465,34 @@ namespace WiPapper
                     Width = ScreenList[i].Width,
                     Height = ScreenList[i].Height
                 };
-
-                windowList[i].Initialized += new EventHandler((s, ea) => // тут надо зарефакторить media- это для медиа, а для html надо cefsharp 
-                {
-                    if (fileMedia.AbsolutePath.Contains("index.html"))
-                    {
-                        //метод 1 - (сделать проверки для всякого (например нужно ли запись включать и тд (проверить что будет если не обявить функцию (то есть код будет проверять какие функции есть в обоях при ошибке = false, значит метод не будет работать)))+ можно асинхронность но потом под конец(сначала главное чтобы работало))
-                        SetHtmlWallpaper.FilePath = Path.GetDirectoryName(fileMedia.LocalPath);
-                        SetHtmlWallpaper.SetBrowserAsWallpaper(windowList[i]);
-
-                        currentlyPlaying = true;
-                    }
-                    else
-                    {
-                        //метод 2-в него то что ниже
-                        SetMediaAsWallpaper(windowList[i], i);
-
-                        currentlyPlaying = true;
-                    }
-
-                    HWND windowHandle = new WindowInteropHelper(windowList[i]).Handle;
-                    User32.SetParent(windowHandle, workerw);
-                });
-                windowList[i].UpdateLayout();
-                windowList[i].Show();
+                WindowList[i].Initialized += Window_Initialized;
+                WindowList[i].UpdateLayout();
+                WindowList[i].Show();
                 WallpaperStretchTypeComboBox_SelectionChanged(null, null);
             }
         }
+
+        private void Window_Initialized(object sender, EventArgs e)
+        {
+            Window window = (Window)sender;
+            int i = WindowList.IndexOf(window);
+            if (WallpaperPath.AbsolutePath.Contains("index.html"))
+            {
+                SetHtmlWallpaper.FilePath = Path.GetDirectoryName(WallpaperPath.LocalPath);
+                SetHtmlWallpaper.SetBrowserAsWallpaper(window);
+            }
+            else
+            {
+                SetMediaAsWallpaper(window, i);
+            }
+            currentlySet = true;
+            HWND windowHandle = new WindowInteropHelper(window).Handle;
+            User32.SetParent(windowHandle, workerw);
+        }
+
+
+
+
 
         private void UnSetWallpaper_Click(object sender, RoutedEventArgs e)
         {
@@ -452,15 +501,15 @@ namespace WiPapper
 
         private void Volume_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (currentlyPlaying)
-            mediaList[0].Volume = Volume.Value;
+            if (currentlySet)
+            MediaList[0].Volume = Volume.Value;
         }
 
         private void WallpaperStretchTypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (!WindowInitialized || mediaList == null) return;
+            if (!WindowInitialized || MediaList == null) return;
 
-            foreach (MediaElement mediaItem in mediaList)
+            foreach (MediaElement mediaItem in MediaList)
             {
                 mediaItem.Stretch = (Stretch)WallpaperStretchTypeComboBox.SelectedIndex;
             }
@@ -742,7 +791,7 @@ namespace WiPapper
             {
                 if (ex.Message.Contains("Invalid login credentials"))
                 {
-                    System.Windows.MessageBox.Show("Неверные учетные данные", "Ошибка авторизации", MessageBoxButton.OK, MessageBoxImage.Error);
+                    System.Windows.MessageBox.Show("Неверные учетные данные или такой пользователь не существует", "Ошибка авторизации", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
                 else
                 {

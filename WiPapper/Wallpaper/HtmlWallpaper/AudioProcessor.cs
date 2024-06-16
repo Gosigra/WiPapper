@@ -133,15 +133,15 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
 
         private static void SendAudioData(double[] spectrumData)
         {
-            string jsonAudioData = JsonConvert.SerializeObject(spectrumData);
-            //string jsonAudioData = System.Text.Json.JsonSerializer.Serialize(spectrumData);
+            //string jsonAudioData = JsonConvert.SerializeObject(spectrumData);
+            string jsonAudioData = System.Text.Json.JsonSerializer.Serialize(spectrumData);
             //SetHtmlWallpaper.Browser.ExecuteScriptAsync("wallpaperAudioListener", jsonAudioData);
 
-            for (int i = 0; i < MainWindow.windowList.Count; i++)
+            for (int i = 0; i < MainWindow.WindowList.Count; i++)
             {
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    ChromiumWebBrowser browser = MainWindow.windowList[i].Content as ChromiumWebBrowser;
+                    ChromiumWebBrowser browser = MainWindow.WindowList[i].Content as ChromiumWebBrowser;
                     browser.ExecuteScriptAsync("wallpaperAudioListener", jsonAudioData); //надоедливая ошибка при закрытии обоев                    
                 });
             }
