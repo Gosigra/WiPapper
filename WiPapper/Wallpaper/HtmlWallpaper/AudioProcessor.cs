@@ -5,6 +5,7 @@ using System.Numerics;
 using CefSharp;
 using CefSharp.Wpf;
 using NAudio.Wave;
+using Newtonsoft.Json;
 
 namespace WiPapper.Wallpaper.HtmlWallpaper
 {
@@ -132,8 +133,8 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
 
         private static void SendAudioData(double[] spectrumData)
         {
-            //string jsonAudioData2 = JsonConvert.SerializeObject(spectrumData);
-            string jsonAudioData = System.Text.Json.JsonSerializer.Serialize(spectrumData);
+            string jsonAudioData = JsonConvert.SerializeObject(spectrumData);
+            //string jsonAudioData = System.Text.Json.JsonSerializer.Serialize(spectrumData);
             //SetHtmlWallpaper.Browser.ExecuteScriptAsync("wallpaperAudioListener", jsonAudioData);
 
             for (int i = 0; i < MainWindow.windowList.Count; i++)

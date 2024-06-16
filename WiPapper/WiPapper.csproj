@@ -71,6 +71,7 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup />
+  <PropertyGroup />
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
@@ -190,9 +191,6 @@
     </PackageReference>
     <PackageReference Include="Supabase">
       <Version>1.0.3</Version>
-    </PackageReference>
-    <PackageReference Include="System.Text.Json">
-      <Version>8.0.3</Version>
     </PackageReference>
     <PackageReference Include="Vanara.PInvoke.User32">
       <Version>4.0.1</Version>

@@ -36,13 +36,18 @@ namespace WiPapper
                                                                                          "Wallpapers";
             }
 
+            
             DownloadWallpaper(folderPath, sender as Button);
         }
 
         private async void DownloadWallpaper(string folderPath, Button button)
         {
+            Application.Current.Dispatcher.Invoke(() => DowloadProgressGrid.Visibility = Visibility.Visible);
+
             await DownloadWallpaperAsync(folderPath, button.Tag.ToString());
-            MessageBox.Show("Обои успешно скачаны");
+            //MessageBox.Show("Обои успешно скачаны");
+
+            Application.Current.Dispatcher.Invoke(() => DowloadProgressGrid.Visibility = Visibility.Collapsed);
         }
 
         private async Task DownloadWallpaperAsync(string folderPath, string supabasePath)
@@ -66,7 +71,6 @@ namespace WiPapper
                         .Download($"{supabasePath}/{prew.Name}", null);
 
                     File.WriteAllBytes(fullPath, bytes);
-                    Console.WriteLine($"Файл {fullPath} успешно скачан и сохранен.");
                 }
                 else if (prew.IsFolder)
                 {

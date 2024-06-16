@@ -20,5 +20,12 @@
                 </Button.Content>
             </Button>
         </Grid>
+        <Grid x:Name="DowloadProgressGrid" Visibility="Collapsed" Background="#44000000">
+            <ProgressBar Value="0"
+                 Width="80"                                         
+                 Margin="0 -60 0 0"
+                 IsIndeterminate="True"
+                 Style="{StaticResource MaterialDesignCircularProgressBar}"/>
+        </Grid>
     </Grid>
 </UserControl>

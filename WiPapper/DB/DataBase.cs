@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using Supabase;
 using Supabase.Gotrue;
 using System.IO;
-using static WiPapper.MainWindow;
-using Supabase.Interfaces;
 
 namespace WiPapper.DB
 {

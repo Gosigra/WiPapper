@@ -119,7 +119,7 @@ namespace WiPapper
             
             dataBase.Start();
 
-            DataContext = this;
+            DataContext = this; // cprosit
             FillWallpapersContainer();
 
             FillLists();
@@ -171,8 +171,8 @@ namespace WiPapper
         {
             if(WindowState == WindowState.Minimized)
             {
-                notifyIcon.BalloonTipTitle = "WiPaper";
-                notifyIcon.BalloonTipText = "WiPaper было свёрнуто";
+                notifyIcon.BalloonTipTitle = "WiPapper";
+                notifyIcon.BalloonTipText = "WiPapper было свёрнуто";
                 notifyIcon.Visible = true;
                 notifyIcon.ShowBalloonTip(10000);
                 //ni.ShowBalloonTip(10000, "WiPaper", "WiPaper было свёрнуто", ToolTipIcon.Info);
@@ -222,7 +222,6 @@ namespace WiPapper
 
         private void Window_ContentRendered(object sender, EventArgs e) //7  Общая цель этого метода - инициализировать ваше окно и выполнить необходимые действия после его отображения, включая загрузку настроек, установку начального состояния окна и настройку прослушивания событий.
         {
-            // Заполнение ComboBox, загрузка настроек и установка начального состояния окна
             LoadSettings();
             WindowInitialized = true;
 
@@ -249,8 +248,8 @@ namespace WiPapper
             WindowStateHook = User32.SetWinEventHook(User32.EventConstants.EVENT_MIN, User32.EventConstants.EVENT_MAX, IntPtr.Zero, procDelegate, 0, 0, User32.WINEVENT.WINEVENT_OUTOFCONTEXT);
         }
 
-        private void UseMaximizedSettingsCheckBox_Changed(object sender, RoutedEventArgs e) //
-        {   // Обработчик события изменения состояния флажка UseMaximizedSettingsCheckBox
+        private void UseMaximizedSettingsCheckBox_Changed(object sender, RoutedEventArgs e) 
+        {
             if (!WindowInitialized) return;
             OptionsManager.Options.UseDifferentSettingsWhenMaximized = UseMaximizedSettingsCheckBox.IsChecked ?? false;
             Taskbars.UpdateAllSettings();
@@ -269,7 +268,7 @@ namespace WiPapper
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(ex.Message, "Не удалось установить ключ реестра");  //исправить на русский
+                System.Windows.MessageBox.Show(ex.Message, "Не удалось установить ключ реестра");
             }
         }
 
@@ -609,7 +608,7 @@ namespace WiPapper
             {
                 EditSwitchTextBlock.Text = "Основная панель задач";
             }
-            else if (TaskbarBeingEdited == "Maximized")
+            else if (TaskbarBeingEdited == "Maximized") //additional
             {
                 EditSwitchTextBlock.Text = "Дополнительная панель задач";
             }
@@ -756,10 +755,6 @@ namespace WiPapper
             }
         }
 
-
-
-
-
         private async void CreateAccountButton_Click(object sender, RoutedEventArgs e)
         {// в другой метод
             string name = RegisterNameTextBox.Text;
@@ -775,6 +770,7 @@ namespace WiPapper
                 //заменить
 
                 DataBase.session = await DataBase._supabase.Auth.SignUp(email, password);
+                
 
                 var model = new UserInfo
                 {
@@ -812,7 +808,7 @@ namespace WiPapper
                 {
                     if (folderDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                     {
-                        MyGrid.IsEnabled = false;
+                        UploadProgressGrid.Visibility = Visibility.Visible;
                         string folderPath = folderDialog.SelectedPath;
                         string rootFolderName = Path.GetFileName(folderPath);
                         Guid userId = Guid.Parse(DataBase.session.User.Id);
@@ -822,14 +818,14 @@ namespace WiPapper
                         if (maxSize > folderSize)
                         {
                             await UploadFolderAsync(folderPath, rootFolderName, userId);
-                            System.Windows.MessageBox.Show("Все файлы успешно загружены.");
+                            //System.Windows.MessageBox.Show("Все файлы успешно загружены.");
                         }
                         else
                         {
-                            System.Windows.MessageBox.Show($"Размер папки превышает максимальный размер и не будет загружен.");
+                            System.Windows.MessageBox.Show("Размер папки превышает максимальный размер и не будет загружен.");
                         }
 
-                        MyGrid.IsEnabled = true;
+                        UploadProgressGrid.Visibility = Visibility.Collapsed;
                     }
                 }
             }
@@ -838,7 +834,6 @@ namespace WiPapper
                 System.Windows.MessageBox.Show(ex.ToString());
             }
         }
-
 
         private async Task UploadFolderAsync(string localFolderPath, string supabaseFolderPath, Guid userId)
         {
@@ -897,66 +892,5 @@ namespace WiPapper
             }
             return size;
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        //public async void DownloadButton_Click(object sender, RoutedEventArgs e)
-        //{// это должно быть в загрузке настроек DownloadPath.Text = ,,,
-        //    string folderPath = DownloadPath.Text;
-
-        //    if (string.IsNullOrEmpty(folderPath))
-        //    {
-        //        if (!Directory.Exists("Wallpapers"))
-        //        {
-        //            Directory.CreateDirectory("Wallpapers");
-        //        }
-        //        folderPath = "Wallpapers";
-        //    }
-        //    else
-        //    {
-        //        folderPath = Directory.Exists(DownloadPath.Text) ? DownloadPath.Text :
-        //                                                           "Wallpapers";
-        //    }
-
-        //    var objects = await DataBase._supabase.Storage.From("Wallpapers").List();  //папки (надо сделать если в папке будут папки)  //скачивание
-
-        //    foreach (var obj in objects)
-        //    {
-        //        var preview = await DataBase._supabase.Storage.From("Wallpapers").List($"{obj.Name}");// файлы в папке
-
-        //        foreach (var prew in preview)
-        //        {
-        //            var bytes = await DataBase._supabase.Storage
-        //              .From("Wallpapers")
-        //              .Download($"{obj}/{prew.Name}", null); // убрать прогресс (s, progress) => Debug.WriteLine($"{progress}%")
-
-        //            System.IO.File.WriteAllBytes($"{folderPath}/{obj.Name}", bytes);
-
-        //            Console.WriteLine(bytes);
-        //        }
-        //    }
-        //}
     }
 }
