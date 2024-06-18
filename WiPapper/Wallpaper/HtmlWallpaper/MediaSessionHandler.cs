@@ -12,14 +12,15 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
 {
     internal static class MediaSessionHandler
     {
-        private static string oldThumbnailUrl;
+        public static string oldThumbnailUrl;
         private static readonly MediaProperties mediaProperties = new MediaProperties();
         private static GlobalSystemMediaTransportControlsSession session;
-        static GlobalSystemMediaTransportControlsSessionManager sessionManager = null;
 
         public static void IsBrowserInitialized(object sender, DependencyPropertyChangedEventArgs e)
         {
-            sessionManager = GlobalSystemMediaTransportControlsSessionManager.RequestAsync().GetAwaiter().GetResult();
+            //(sender as ChromiumWebBrowser).IsBrowserInitializedChanged -= IsBrowserInitialized;
+
+            GlobalSystemMediaTransportControlsSessionManager sessionManager = GlobalSystemMediaTransportControlsSessionManager.RequestAsync().GetAwaiter().GetResult();            
             sessionManager.CurrentSessionChanged += SessionManager_CurrentSessionChanged;
             SetHtmlWallpaper.Browser.FrameLoadEnd += Browser_FrameLoadEnd;
 

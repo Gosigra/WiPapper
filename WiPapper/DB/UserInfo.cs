@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace WiPapper.DB
 {
-    [Table("client")]
+    [Table("clients")]
     class UserInfo : BaseModel
     {
         [Column("id")]

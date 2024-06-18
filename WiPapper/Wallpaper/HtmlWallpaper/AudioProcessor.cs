@@ -6,25 +6,18 @@ using CefSharp;
 using CefSharp.Wpf;
 using NAudio.Wave;
 using Newtonsoft.Json;
+using System.Diagnostics;
 
 namespace WiPapper.Wallpaper.HtmlWallpaper
 {
     internal static class AudioProcessor
     {
         public static int Channels { get; set; } = 1;
-        private static WasapiLoopbackCapture Capture = new WasapiLoopbackCapture();
+        public static WasapiLoopbackCapture Capture = new WasapiLoopbackCapture();
 
-        public static void ChangeWaweFormat()
+        public static void RecordAudioData()                                        // channels, true = 2channels в host определить
         {
-            Capture.StopRecording();
-            Channels = 2;
-            RecordAudioData();
-        }
-
-        public static void RecordAudioData() // channels, true = 2channels в host определить
-        {
-            //var Capture = new WasapiLoopbackCapture();
-            Capture.WaveFormat = new WaveFormat(48000, 16, Channels); // переменную для установки кол-ва каналов и обработку закрытия обоев(остановку записи(проверить может сама остановится при закрытии))
+            Capture.WaveFormat = new WaveFormat(48000, 16, Channels);                                                                                    // переменную для установки кол-ва каналов и обработку закрытия обоев(остановку записи(проверить может сама остановится при закрытии))
 
             Capture.StartRecording();
             Capture.DataAvailable += (s, e) =>
@@ -34,8 +27,6 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
                     ProcessAudioData(Capture, e);
                 }
             };
-            // Для остановки записи, вы можете вызвать метод StopRecording
-            // capture.StopRecording();
         }
 
         private static void ProcessAudioData(WasapiLoopbackCapture capture, WaveInEventArgs e)
@@ -51,7 +42,7 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
                 leftChannel = GetMonoChannelData(e.Buffer, samplesRecorded, bytesPerSample);
                 rightChannel = null;
             }
-            else // Предполагается, что количество каналов равно 2
+            else                                                                                                        // Предполагается, что количество каналов равно 2
             {
                 (leftChannel, rightChannel) = GetStereoChannelData(e.Buffer, samplesRecorded, bytesPerSample);
             }
@@ -142,7 +133,7 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     ChromiumWebBrowser browser = MainWindow.WindowList[i].Content as ChromiumWebBrowser;
-                    browser.ExecuteScriptAsync("wallpaperAudioListener", jsonAudioData); //надоедливая ошибка при закрытии обоев                    
+                    browser.ExecuteScriptAsync("wallpaperAudioListener", jsonAudioData);
                 });
             }
         }

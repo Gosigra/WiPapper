@@ -62,7 +62,7 @@
                                                          Style="{StaticResource MaterialDesignFloatingHintRevealPasswordBox}"
                                                          VerticalContentAlignment="Bottom"/>
 
-                                            <Button x:Name="LoginButton" Content="Войти" Width="100" Height="40" Margin="10" VerticalAlignment="Center" Click="LoginButton_Click"/>
+                                            <Button x:Name="AuthorizeButton" Content="Войти" Width="100" Height="40" Margin="10" VerticalAlignment="Center" Click="AuthorizeButton_Click"/>
                                         </StackPanel>
                                     </TabItem>
                                 </TabControl>

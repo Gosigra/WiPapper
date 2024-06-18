@@ -35,6 +35,7 @@ using Windows.System;
 using WiPapper.DB;
 using Newtonsoft.Json.Linq;
 using System.Runtime.InteropServices.ComTypes;
+using System.Text.RegularExpressions;
 
 
 //Получать высоту панели задач и передавать в браузер её + цвет панели чтобы на сайте можно было сделать визуализацию как будто от панели задач столбцы(подумал что можно без высоты и чтобы разработчики сами её писали)
@@ -301,6 +302,7 @@ namespace WiPapper
 
         private void Window_Closed(object sender, EventArgs e)
         {
+            System.Windows.Application.Current.Shutdown();
             //Environment.Exit(0); // была ошибка поэтому убрал
         }
 
@@ -329,8 +331,8 @@ namespace WiPapper
         {
             if (currentlySet)
             {
-                //media?.Stop();
-                //mediaList = null;
+                MediaSessionHandler.oldThumbnailUrl = string.Empty;
+                AudioProcessor.Capture.StopRecording();
                 foreach (Window window in WindowList)
                 {
                     window.Close();
@@ -380,62 +382,6 @@ namespace WiPapper
 
             }
         }
-
-        //private void SetWallpaperButton_Click(object sender, RoutedEventArgs e)
-        //{
-        //    FindWorkerWindow();
-
-        //    if (fileMedia == null)
-        //    {
-        //        SetWallpaperButton.IsEnabled = false;
-        //        return;
-        //    }
-        //    if (currentlyPlaying)
-        //    {
-        //        UnSetWall();
-        //    }
-
-        //    for (int i = 0; i < WindowList.Count; i++) // можно цикл убрать и сделать для 1 монитора иначе потом для не 1го монитора надо асинхронность
-        //    {
-        //        //Window window = new Window(); //сделать одно окно
-
-        //        WindowList[i] = new Window
-        //        {
-        //            WindowStyle = WindowStyle.None,
-        //            AllowsTransparency = true,
-
-        //            Top = ScreenList[i].Top,
-        //            Left = ScreenList[i].Left,
-        //            Width = ScreenList[i].Width,
-        //            Height = ScreenList[i].Height
-        //        };
-
-        //        WindowList[i].Initialized += new EventHandler((s, ea) =>
-        //        {
-        //            if (fileMedia.AbsolutePath.Contains("index.html"))
-        //            {
-        //                //метод 1 - (сделать проверки для всякого (например нужно ли запись включать и тд (проверить что будет если не обявить функцию (то есть код будет проверять какие функции есть в обоях при ошибке = false, значит метод не будет работать)))+ можно асинхронность но потом под конец(сначала главное чтобы работало))
-        //                SetHtmlWallpaper.FilePath = Path.GetDirectoryName(fileMedia.LocalPath);
-        //                SetHtmlWallpaper.SetBrowserAsWallpaper(WindowList[i]);
-
-        //                currentlyPlaying = true;
-        //            }
-        //            else
-        //            {
-        //                //метод 2-в него то что ниже
-        //                SetMediaAsWallpaper(WindowList[i], i);
-
-        //                currentlyPlaying = true;
-        //            }
-
-        //            HWND windowHandle = new WindowInteropHelper(WindowList[i]).Handle;
-        //            User32.SetParent(windowHandle, workerw);
-        //        });
-        //        WindowList[i].UpdateLayout();
-        //        WindowList[i].Show();
-        //        WallpaperStretchTypeComboBox_SelectionChanged(null, null);
-        //    }
-        //}
 
         private void SetWallpaperButton_Click(object sender, RoutedEventArgs e)
         {
@@ -772,64 +718,40 @@ namespace WiPapper
 
 
 
-        private async void LoginButton_Click(object sender, RoutedEventArgs e)
+        private async void AuthorizeButton_Click(object sender, RoutedEventArgs e)
         {
-            string email = AutorizationEmailTextBox.Text;
-            string password = AutorizationPasswordTextBox.Password;
+           bool isAuthorized = await DataBase.Authorize(AutorizationEmailTextBox.Text, AutorizationPasswordTextBox.Password);
 
-            try
-            {
-                DataBase.session = await DataBase._supabase.Auth.SignIn(email, password);
-
-                if (DataBase.session != null)
-                {
-                    AccountTabControl.Visibility = Visibility.Collapsed;
-                    UserAutorizedPanel.Visibility = Visibility.Visible;
-                }
-            }
-            catch (GotrueException ex)
-            {
-                if (ex.Message.Contains("Invalid login credentials"))
-                {
-                    System.Windows.MessageBox.Show("Неверные учетные данные или такой пользователь не существует", "Ошибка авторизации", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-                else
-                {
-                    System.Windows.MessageBox.Show($"Произошла ошибка: {ex.Message}", "Ошибка авторизации", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show($"Произошла неизвестная ошибка: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            AccountTabControl.Visibility = isAuthorized ? Visibility.Collapsed : Visibility.Visible;
+            UserAutorizedPanel.Visibility = isAuthorized ? Visibility.Visible : Visibility.Collapsed;
         }
 
         private async void CreateAccountButton_Click(object sender, RoutedEventArgs e)
-        {// в другой метод
+        {
             string name = RegisterNameTextBox.Text;
             string email = RegisterEmailTextBox.Text;
-            string password = RegisterPasswordBox.Password;
+            string password = RegisterPasswordBox.Password;            
 
             if (name == string.Empty || email == string.Empty || password == string.Empty)
             {
-                System.Windows.MessageBox.Show("Заполните все поля");
+                System.Windows.MessageBox.Show("Заполните все поля", "Ошибка регистрации", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            if (!IsValidEmail(email))
+            {
+                System.Windows.MessageBox.Show("Почта введена неверно", "Ошибка регистрации", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            if (RegisterPasswordBox.Password.Length < 6)
+            {
+                System.Windows.MessageBox.Show("Пароль должен состоять минимум из 6 символов", "Ошибка регистрации", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
             }
             else
             {
-                //заменить
+                bool isAuthorized = await DataBase.CreateAccount(RegisterNameTextBox.Text, RegisterEmailTextBox.Text, RegisterPasswordBox.Password);
 
-                DataBase.session = await DataBase._supabase.Auth.SignUp(email, password);
-                
-
-                var model = new UserInfo
-                {
-                    Id = DataBase.session.User.Id,
-                    Name = name,
-                };
-                await DataBase._supabase.From<UserInfo>().Insert(model);
-
-                AccountTabControl.Visibility = Visibility.Collapsed;
-                UserAutorizedPanel.Visibility = Visibility.Visible;
+                AccountTabControl.Visibility = isAuthorized ? Visibility.Collapsed : Visibility.Visible;
+                UserAutorizedPanel.Visibility = isAuthorized ? Visibility.Visible : Visibility.Collapsed;
             }
 
             RegisterNameTextBox.Text = null;
@@ -837,11 +759,23 @@ namespace WiPapper
             RegisterPasswordBox.Password = null;
         }
 
-        
+        public bool IsValidEmail(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return false;
 
-
-
-
+            try
+            {
+                // Проверка с помощью регулярного выражения
+                string pattern = @"^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$";
+                return Regex.IsMatch(email, pattern);
+            }
+            catch
+            {
+                // Если произошла ошибка при проверке, считаем адрес недействительным
+                return false;
+            }
+        }
 
         private async void UploadButton_Click(object sender, RoutedEventArgs e)
         {
@@ -866,8 +800,7 @@ namespace WiPapper
                         long folderSize = GetDirectorySize(folderPath);
                         if (maxSize > folderSize)
                         {
-                            await UploadFolderAsync(folderPath, rootFolderName, userId);
-                            //System.Windows.MessageBox.Show("Все файлы успешно загружены.");
+                            await DataBase.UploadFolderAsync(folderPath, rootFolderName, userId);
                         }
                         else
                         {
@@ -881,44 +814,6 @@ namespace WiPapper
             catch (Exception ex)
             {
                 System.Windows.MessageBox.Show(ex.ToString());
-            }
-        }
-
-        private async Task UploadFolderAsync(string localFolderPath, string supabaseFolderPath, Guid userId)
-        {
-            string[] preview = Directory.GetFiles(localFolderPath, "preview.*", SearchOption.TopDirectoryOnly);
-            if (preview.Length == 0)
-            {
-                System.Windows.MessageBox.Show("Добавте превью в папку с обоями");
-                return;
-            }
-
-            var files = Directory.GetFiles(localFolderPath);
-            var directories = Directory.GetDirectories(localFolderPath);
-
-            // Загрузка файлов в текущей папке
-            foreach (var file in files)
-            {
-                string fileName = Path.GetFileName(file);
-                var response = await DataBase._supabase.Storage
-                    .From($"Wallpapers/{supabaseFolderPath}")
-                    .Upload(file, fileName, null); //onProgress: (s, progress) => Debug.WriteLine($"{progress}%")
-
-                if (file.Contains("preview"))
-                {
-                    var publicUrl = DataBase._supabase.Storage
-                        .From("Wallpapers")
-                        .GetPublicUrl($"{supabaseFolderPath}/{fileName}");
-
-                    var result = await DataBase._supabase.Rpc("append_to_array", new { idd = userId, newelement = publicUrl });
-                }
-            }
-
-            // Рекурсивная обработка подкаталогов
-            foreach (var directory in directories)
-            {
-                string folderName = Path.GetFileName(directory);
-                await UploadFolderAsync(directory, $"{supabaseFolderPath}/{folderName}", userId);
             }
         }
 
