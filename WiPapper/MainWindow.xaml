@@ -232,21 +232,74 @@
                         <!--<Image Source="Resources/settings.png" Height="25" Width="25" Margin="0" VerticalAlignment="Center"/>-->
                         <materialDesign:PackIcon Kind="cog" Height="25" Width="25" Foreground="Black"/>
                     </TabItem.Header>
-                    <Grid Background="LightGray">
-                        <Border Margin="10" Background="White" CornerRadius="10">
-                            <StackPanel>
-                                <TextBlock Text="Настройки" FontSize="18" Margin="0 10 0 0" VerticalAlignment="Top" HorizontalAlignment="Center"/>
+                    
+                    <materialDesign:DrawerHost x:Name="DrawerHost"                                                   
+                                                   Margin="0"
+                                                   Width="450"
+                                                   Height="377"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center">
+                                
+                                
+                        <materialDesign:DrawerHost.RightDrawerContent >
+                            <StackPanel Margin="0" Width="350">
+                                <Button Margin="4"
+                                        HorizontalAlignment="Right"
+                                        Command="{x:Static materialDesign:DrawerHost.CloseDrawerCommand}"                                        
+                                        Style="{StaticResource MaterialDesignFlatButton}" >
 
-                                <CheckBox x:Name="StartMinimizedCheckBox" Content="Запустить приложение свёрнутым" FontSize="14" Margin="5 5 0 0" VerticalAlignment="Top" HorizontalAlignment="Left" materialDesign:CheckBoxAssist.CheckBoxSize="23"/>
-                                <CheckBox x:Name="SetWallpapperWhenLaunchedCheckBox" Content="Установить обои при запуске приложения" FontSize="14" Margin="5,5,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" materialDesign:CheckBoxAssist.CheckBoxSize="23"/>
-                                <CheckBox x:Name="StartWhenLaunchedCheckBox" Content="Изменить панель задач при запуске" FontSize="14" Margin="5,5,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" materialDesign:CheckBoxAssist.CheckBoxSize="23"/>
-                                <CheckBox x:Name="UseMaximizedSettingsCheckBox" Content="Разные настройки при развёрнутом окне" FontSize="14" Margin="5,5,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Checked="UseMaximizedSettingsCheckBox_Changed" Unchecked="UseMaximizedSettingsCheckBox_Changed" materialDesign:CheckBoxAssist.CheckBoxSize="23"/>
-                                <CheckBox x:Name="StartWithWindowsCheckBox" Content="Запустить приложение вместе с Windows" Margin="5,5,0,0" FontSize="14" VerticalAlignment="Top" HorizontalAlignment="Left" Checked="StartWithWindowsCheckBox_Changed" Unchecked="StartWithWindowsCheckBox_Changed" materialDesign:CheckBoxAssist.CheckBoxSize="23"/>
+                                    <Button.Content>
+                                        <materialDesign:PackIcon Kind="CloseBoxOutline" Width="25" Height="25" Margin="-10" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="Black" />                                        
+                                    </Button.Content>
+                                </Button>
 
-                                <TextBox x:Name="DefaultInstallationPath"  Width="300" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5 5 0 0" materialDesign:HintAssist.Hint="Путь для установки обоев" Padding="4" Style="{StaticResource MaterialDesignFloatingHintTextBox}"/>
+
+                                <TextBox x:Name="FeedbackNameTextBox" Margin="5" materialDesign:HintAssist.Hint="Имя" Padding="5" Style="{StaticResource  MaterialDesignOutlinedTextBox}"/>
+
+                                <TextBox x:Name="FeedbackSubjectTextBox" Margin="5" materialDesign:HintAssist.Hint="Тема" Padding="5" Style="{StaticResource  MaterialDesignOutlinedTextBox}"/>
+
+                                <TextBox x:Name="FeedbackBodyTextBox" Margin="5" Height="150" materialDesign:HintAssist.Hint="Описание" Padding="5" Style="{StaticResource  MaterialDesignOutlinedTextBox}" TextWrapping="Wrap"/>
+
+                                <Button x:Name="SendEmailButton"
+                                        Margin="4"
+                                        HorizontalAlignment="Center"                                        
+                                        Content="Отправить"
+                                        Style="{StaticResource MaterialDesignFlatDarkButton}"
+                                        Click="SendEmailButton_Click"/>
+
+                                
                             </StackPanel>
-                        </Border>
-                    </Grid>
+                        </materialDesign:DrawerHost.RightDrawerContent>
+                                
+                        <Grid Background="LightGray">
+                            <Border x:Name="ParamBorder" Margin="10" Background="White" CornerRadius="10">
+
+                                <Border CornerRadius="10">
+                                    <StackPanel>
+                                        <TextBlock Text="Настройки" FontSize="18" Margin="0 10 0 0" VerticalAlignment="Top" HorizontalAlignment="Center"/>
+
+                                        <CheckBox x:Name="StartMinimizedCheckBox" Content="Запустить приложение свёрнутым" FontSize="14" Margin="5 5 0 0" VerticalAlignment="Top" HorizontalAlignment="Left" materialDesign:CheckBoxAssist.CheckBoxSize="23"/>
+                                        <CheckBox x:Name="SetWallpapperWhenLaunchedCheckBox" Content="Установить обои при запуске приложения" FontSize="14" Margin="5,5,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" materialDesign:CheckBoxAssist.CheckBoxSize="23"/>
+                                        <CheckBox x:Name="StartWhenLaunchedCheckBox" Content="Изменить панель задач при запуске" FontSize="14" Margin="5,5,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" materialDesign:CheckBoxAssist.CheckBoxSize="23"/>
+                                        <CheckBox x:Name="UseMaximizedSettingsCheckBox" Content="Разные настройки при развёрнутом окне" FontSize="14" Margin="5,5,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Checked="UseMaximizedSettingsCheckBox_Changed" Unchecked="UseMaximizedSettingsCheckBox_Changed" materialDesign:CheckBoxAssist.CheckBoxSize="23"/>
+                                        <CheckBox x:Name="StartWithWindowsCheckBox" Content="Запустить приложение вместе с Windows" Margin="5,5,0,0" FontSize="14" VerticalAlignment="Top" HorizontalAlignment="Left" Checked="StartWithWindowsCheckBox_Changed" Unchecked="StartWithWindowsCheckBox_Changed" materialDesign:CheckBoxAssist.CheckBoxSize="23"/>
+
+                                        <TextBox x:Name="DefaultInstallationPath"  Width="300" Height="30" FontSize="14" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="8 8 0 0" materialDesign:HintAssist.Hint="Путь установки обоев" Padding="5" Style="{StaticResource  MaterialDesignOutlinedTextBox}"/>
+
+                                        <Button Content="Обратная связь"
+                                                Width="200"
+                                                Margin="0 113 0 0"                                                
+                                                FontSize="14"
+                                                Style="{StaticResource MaterialDesignFlatDarkButton}"
+                                                Command="{x:Static materialDesign:DrawerHost.OpenDrawerCommand}"
+                                                CommandParameter="{x:Static Dock.Right}"
+                                                materialDesign:ElevationAssist.Elevation="Dp0"/>
+                                    </StackPanel>
+                                </Border>
+                            </Border>
+                        </Grid>
+                    </materialDesign:DrawerHost>
+                        
                 </TabItem>
             </TabControl>
         </materialDesign:Card>

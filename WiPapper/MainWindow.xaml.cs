@@ -36,6 +36,7 @@ using WiPapper.DB;
 using Newtonsoft.Json.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text.RegularExpressions;
+using System.Reactive.Subjects;
 
 
 //Получать высоту панели задач и передавать в браузер её + цвет панели чтобы на сайте можно было сделать визуализацию как будто от панели задач столбцы(подумал что можно без высоты и чтобы разработчики сами её писали)
@@ -303,7 +304,6 @@ namespace WiPapper
         private void Window_Closed(object sender, EventArgs e)
         {
             System.Windows.Application.Current.Shutdown();
-            //Environment.Exit(0); // была ошибка поэтому убрал
         }
 
         #region Wallpaper
@@ -379,7 +379,6 @@ namespace WiPapper
                 default:
                     SetWallpaperButton.IsEnabled = false;
                     break;
-
             }
         }
 
@@ -435,10 +434,6 @@ namespace WiPapper
             HWND windowHandle = new WindowInteropHelper(window).Handle;
             User32.SetParent(windowHandle, workerw);
         }
-
-
-
-
 
         private void UnSetWallpaper_Click(object sender, RoutedEventArgs e)
         {
@@ -835,6 +830,33 @@ namespace WiPapper
                 size += GetDirectorySize(di.FullName);
             }
             return size;
+        }
+
+        private void SendEmailButton_Click(object sender, RoutedEventArgs e)
+        {
+            string name = FeedbackNameTextBox.Text;
+            string email = FeedbackSubjectTextBox.Text;
+            string message = FeedbackBodyTextBox.Text;
+
+            if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(message))
+            {
+                System.Windows.MessageBox.Show("Пожалуйста заполните все поля.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            try
+            {
+                Feedback.SendEmail(name, email, message);
+                System.Windows.MessageBox.Show("Ваше сообщение отправлено.", "Успешно", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show("Ошибка отправки сообщения: " + ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+            FeedbackNameTextBox.Text = null;
+            FeedbackSubjectTextBox.Text = null;
+            FeedbackBodyTextBox.Text = null;
         }
     }
 }

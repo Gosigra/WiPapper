@@ -10,317 +10,40 @@
         Title="Window1" Height="470" Width="470"
         ResizeMode="CanMinimize">
     <Grid x:Name="MyGrid" Background="White">
-        <!--<Grid.RowDefinitions >
-            <RowDefinition Height="40"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>-->
-
-        <!--<Line X1="0" Y1="40" X2="{Binding ActualWidth, ElementName = MyGrid}" Y2="40" Stroke="Black" StrokeThickness="1.5"/>
-
-        <materialDesign:ColorZone Mode="Light">
-
-            <Grid Grid.Row="0">                
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="40"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="40"/>
-                </Grid.ColumnDefinitions>
-
-          
-
-                <Button Width="30" Height="30" Margin="5" 
-                    
-                    HorizontalAlignment="Left" VerticalAlignment="Top" 
-                    Grid.Column="0" Style="{StaticResource MaterialDesignToolButton}">
-                
-                    <Image Source="Resources/user.png" Height="30" Width="30" Margin="-16 -16 -14 -16"/>
-                
-                </Button>
-
-                <Button Width="30" Height="30" Margin="5" 
-                    Background="White" BorderBrush="White" 
-                    HorizontalAlignment="Right" VerticalAlignment="Top" 
-                    Grid.Column="3" Style="{StaticResource MaterialDesignToolButton}">
-               
-                -->
-        <!--<materialDesign:PackIcon Kind="Cog" Height="30" Width="30" Margin="-15 -5 0 0"/>-->
-        <!--
-                <Image Source="Resources/settings.png" Height="30" Width="30" Margin="-16 -16 -14 -16"/>
-
-                </Button>
-
+        <materialDesign:DrawerHost x:Name="DrawerHost"
+                                   Width="470"
+                                   Height="470"
+                                   Margin="0"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   
+                                   BorderThickness="2"                                   
+                                   RightDrawerCornerRadius="20 20 0 0">
             
-                <Button x:Name="WallpaperButton" Content="Обои" 
-                    Width="150" Height="30" FontSize="20"                      
-                    HorizontalAlignment="Right" VerticalAlignment="Center" 
-                    Grid.Column="1" Style="{StaticResource MaterialDesignFlatButton}"
-                    materialDesign:ButtonAssist.CornerRadius="15 0 0 15"
-                    Click="WallpaperButton_Click">                
-                </Button>
+            
+            <materialDesign:DrawerHost.RightDrawerContent>
+                <StackPanel Margin="100">
+                    <TextBlock Margin="4"
+                               HorizontalAlignment="Center"
+                               Text="THE RIGHT STUFF" />                    
+                    <Button Margin="4"
+                            HorizontalAlignment="Center"
+                            Command="{x:Static materialDesign:DrawerHost.CloseDrawerCommand}"
+                            Content="CLOSE ALL"
+                            Style="{StaticResource MaterialDesignFlatButton}" />
+                </StackPanel>
+            </materialDesign:DrawerHost.RightDrawerContent>
 
+            <Grid HorizontalAlignment="Center"
+                  VerticalAlignment="Center" Background="Green">
 
-
-                <Button x:Name="TaskBarButton" Content="Панель"
-                    Width="150" Height="30" FontSize="20" 
-                    Margin="-0.8 0 0 0" Padding="-5"
-                    HorizontalAlignment="Left" VerticalAlignment="Center" 
-                    Grid.Column="2" Style="{StaticResource MaterialDesignFlatButton}"
-                    materialDesign:ButtonAssist.CornerRadius="0 15 15 0"
-                    Click="TaskBarButton_Click">
-                </Button>
-
-        </Grid>
-        </materialDesign:ColorZone>-->
-
-        <!--<Grid Grid.Row="1" >
-            <materialDesign:Card>
-                <TabControl HorizontalContentAlignment="Stretch"
-                    Style="{StaticResource MaterialDesignFilledTabControl}">
-                    <TabItem Margin="0 0 0 0" HorizontalAlignment="Left" >
-                        <TabItem.Header>
-                            -->
-        <!--<Image Source="Resources/settings.png" materialDesign:ButtonAssist.CornerRadius="5"/>-->
-        <!--
-                            <Image Source="Resources/settings.png" Height="30" Width="30" Margin="0 -6 0 0" VerticalAlignment="Center"/>
-                        </TabItem.Header>
-                        <TextBlock Margin="8" Text="Filled, centered, required width, tab 1" />
-                    </TabItem>
-                    <TabItem HorizontalAlignment="Stretch" Header="TAB 2 Wide">
-                        <TextBlock Margin="8" Text="Filled, centered, required width, tab 2" />
-                    </TabItem>
-                    <TabItem HorizontalAlignment="Stretch" Header="TAB 3 Extremely Wide">
-                        <TextBlock Margin="8" Text="Filled, centered, required width, tab 3" />
-                    </TabItem>
-                    <TabItem HorizontalAlignment="Right" Header="TAB 4">
-                        <TextBlock Margin="8" Text="Filled, centered, required width, tab 4" />
-                    </TabItem>
-                </TabControl>
-            </materialDesign:Card>
-        </Grid>-->
-
-
-
-        <materialDesign:Card>
-            <TabControl SelectedIndex="1"
-                        Width="{Binding ActualWidth, ElementName = MyGrid}"
-                        materialDesign:ColorZoneAssist.Mode="PrimaryMid"                                               
-                        Style="{StaticResource MaterialDesignFilledTabControl}">
-
-                <TabItem HorizontalAlignment="Left" Style="{StaticResource MaterialDesignNavigationRailTabItem}" Height="50" Width="50">
-                    <TabItem.Header>
-                        <!--<Image Source="Resources/user.png" Height="30" Width="30" Margin="0"/>-->
-                        <!--<materialDesign:PackIcon Kind="AccountCircleOutline" Height="30" Width="30"/>-->
-                        <materialDesign:PackIcon Kind="AccountOutline" Height="35" Width="35" Foreground="Black"/>
-                    </TabItem.Header>
-
-                    <TabControl SelectedItem="1">
-                        <TabItem Header="Зарегестрироваться">
-
-                        </TabItem>
-
-                        <TabItem Header="Войти">
-
-                        </TabItem>
-                    </TabControl>
-                </TabItem>
-                <TabItem HorizontalAlignment="Stretch" Header="Обои" 
-                         materialDesign:ColorZoneAssist.Foreground="Black">
-
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="5px"/>
-                            <ColumnDefinition Width="auto"/>
-                            <ColumnDefinition Width="auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="auto"/>
-                            <ColumnDefinition Width="auto"/>
-                            <ColumnDefinition Width="5px"/>
-                        </Grid.ColumnDefinitions>
-
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="5px"/>
-                            <RowDefinition Height="auto"/>
-                            <RowDefinition Height="auto"/>
-                            <RowDefinition Height="auto"/>
-                            <RowDefinition Height="auto"/>
-                            <RowDefinition Height="auto"/>
-                            <RowDefinition Height="auto"/>
-                            <RowDefinition Height="auto"/>
-                            <RowDefinition Height="auto"/>
-                            <RowDefinition Height="auto"/>
-                            <RowDefinition Height="5px"/>
-                        </Grid.RowDefinitions>
-
-                        <!--<TextBox x:Name="PathToWall" Grid.Column="3" Grid.Row="3" Width="150" Height="25"/>-->
-                        <Button x:Name="SelectWall" Content="Выбрать обои" Grid.Column="3" Grid.Row="3" Grid.ColumnSpan="2" Width="250" Height="30" Click="SelectWall_Click"  materialDesign:ElevationAssist.Elevation="Dp0"/>
-                        <Button x:Name="SetWallpaperButton" Content="Установить" Grid.Column="3" Grid.Row="4" Width="150" Height="28" Margin="5" Click="SetWallpaperButton_Click" IsEnabled="False"  materialDesign:ElevationAssist.Elevation="Dp0"/>
-                        <Button x:Name="UnSetWallpaper" Content="Убрать" Grid.Column="4" Grid.Row="4" Width="150" Height="28" Margin="5" Click="UnSetWallpaper_Click" IsEnabled="{Binding ElementName=SetWallpaperButton, Path=IsEnabled}"  materialDesign:ElevationAssist.Elevation="Dp0"/>
-
-                        <TextBlock Grid.Column="3" Grid.Row="6" Text="Звук" Margin="5" FontSize="14"/>
-                        <Slider x:Name="Volume" Grid.Column="3" Grid.Row="7" Grid.ColumnSpan="2" ValueChanged="Volume_ValueChanged"/>
-
-                        <ComboBox x:Name="WallpaperStretchTypeComboBox" Grid.Column="3" Grid.Row="8" Margin="0 10 5 0" SelectionChanged="WallpaperStretchTypeComboBox_SelectionChanged" SelectedIndex="0" FontSize="14" Style="{StaticResource MaterialDesignOutlinedComboBox}">
-                            <ComboBoxItem>По центру</ComboBoxItem>
-                            <ComboBoxItem>Растянуть</ComboBoxItem>
-                            <ComboBoxItem>По размеру</ComboBoxItem>
-                            <ComboBoxItem>Заполнение</ComboBoxItem>
-                        </ComboBox>
-                    </Grid>
-                </TabItem>
-                <TabItem HorizontalAlignment="Stretch" Header="Панель" materialDesign:ColorZoneAssist.Foreground="Black">
-                    <ScrollViewer VerticalScrollBarVisibility="Hidden">
-                        <StackPanel Background="LightGray">
-                            <GroupBox Margin="10 10 10 5"
-                                  materialDesign:ElevationAssist.Elevation="Dp4"
-                                  Background="White"
-                                  Header="Основная панель задач"
-                                  FontSize="14"
-                                  Style="{StaticResource MaterialDesignGroupBox}">
-
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="5px"/>
-                                        <ColumnDefinition Width="auto"/>
-                                        <ColumnDefinition Width="auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="5px"/>
-                                    </Grid.ColumnDefinitions>
-
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="5px"/>
-                                        <RowDefinition Height="auto"/>
-                                        <RowDefinition Height="auto"/>
-                                        <RowDefinition Height="auto"/>
-                                        <RowDefinition Height="auto"/>
-                                        <RowDefinition Height="5px"/>
-                                    </Grid.RowDefinitions>
-
-                                    <!--Row 1-->
-                                    <TextBlock Text="Акцент" Margin="5 0 0 0" Grid.Row="1"  Grid.Column="1" VerticalAlignment="Center"/>
-                                    <ComboBox x:Name="AccentComboBox" Margin="4 0 5 2" Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" SelectionChanged="AccentComboBox_SelectionChanged">
-                                        <ComboBoxItem>Отключить</ComboBoxItem>
-                                        <ComboBoxItem>Градиент</ComboBoxItem>
-                                        <ComboBoxItem>Прозрачный градиент</ComboBoxItem>
-                                        <ComboBoxItem>Размытие</ComboBoxItem>
-                                        <ComboBoxItem>Альтернативное размытие</ComboBoxItem>
-                                    </ComboBox>
-
-                                    <!--Row 2-->
-                                    <TextBlock Text="Цвет" Margin="5 10" Grid.Row="2"  Grid.Column="1" VerticalAlignment="Center"/>
-                                    <xctk:ColorPicker x:Name="ColorPicker" Margin="-10 0 0 0" Width="25" Height="25" VerticalAlignment="Center" ColorMode="ColorCanvas" ShowDropDownButton="False" ShowTabHeaders="False" Grid.Row="2" Grid.Column="2" SelectedColorChanged="ColorPicker_SelectedColorChanged" />
-                                    <CheckBox x:Name="WindowsAccentColorCheckBox" Grid.Row="2" Grid.Column="3" VerticalAlignment="Center" Margin="0" Checked="WindowsAccentColorCheckBox_Changed" Unchecked="WindowsAccentColorCheckBox_Changed">
-                                        <TextBlock Text="Использовать цвет Windows" TextWrapping="WrapWithOverflow" Width="auto" />
-                                    </CheckBox>
-
-                                    <!--Row 3-->
-                                    <TextBlock Text="Раскрасить" Margin="5 0 0 0" Grid.Row="3" Grid.Column="1" VerticalAlignment="Center"/>
-                                    <CheckBox x:Name="ColorizeCB" Grid.Row="3" Grid.Column="2" Margin="2 2 22 2" Checked="ColorizeCB_Changed" Unchecked="ColorizeCB_Changed" />
-
-                                    <!--Row 4-->
-                                    <TextBlock Text="Прозрачность" Margin="5 8" Grid.Row="4" Grid.Column="1" VerticalAlignment="Center"/>
-                                    <Slider x:Name="AccentAlphaSlider" Margin="3 8" Minimum="0" Maximum="255" Grid.Row="4" Grid.Column="2" Grid.ColumnSpan="2" Thumb.DragCompleted="AccentAlphaSlider_DragCompleted" Thumb.DragStarted="AccentAlphaSlider_DragStarted" ValueChanged="AccentAlphaSlider_ValueChanged" materialDesign:SliderAssist.HideActiveTrack="True"/>
-
-                                    <!--<Button x:Name="EditSwitchButton" Content="Основная панель задач" Margin="5,5,0,0" Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="3" Click="EditSwitchButton_Click"/>-->
-
-                                    <!--<Button x:Name="StartStopButton" Content="Начать" Grid.Row="8" Grid.Column="3" Click="StartStopButton_Click"/>-->
-                                </Grid>
-                            </GroupBox>
-
-                            <GroupBox Margin="10 5 10 10"
-                                  materialDesign:ElevationAssist.Elevation="Dp4"                                      
-                                  Background="White"
-                                  Header="Дополнительная панель задач"
-                                  FontSize="14"
-                                  Style="{StaticResource MaterialDesignGroupBox}"
->
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="5px"/>
-                                        <ColumnDefinition Width="auto"/>
-                                        <ColumnDefinition Width="auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="5px"/>
-                                    </Grid.ColumnDefinitions>
-
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="5px"/>
-                                        <RowDefinition Height="auto"/>
-                                        <RowDefinition Height="auto"/>
-                                        <RowDefinition Height="auto"/>
-                                        <RowDefinition Height="auto"/>
-                                        <RowDefinition Height="5px"/>
-                                    </Grid.RowDefinitions>
-
-                                    <TextBlock Text="Акцент" Margin="5 0 0 0" Grid.Row="1"  Grid.Column="1" VerticalAlignment="Center"/>
-                                    <ComboBox x:Name="AdditionalAccentComboBox" Margin="4 0 5 2" Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" SelectionChanged="AccentComboBox_SelectionChanged">
-
-                                        <ComboBoxItem>Отключить</ComboBoxItem>
-                                        <ComboBoxItem>Градиент</ComboBoxItem>
-                                        <ComboBoxItem>Прозрачный градиент</ComboBoxItem>
-                                        <ComboBoxItem>Размытие</ComboBoxItem>
-                                        <ComboBoxItem>Альтернативное размытие</ComboBoxItem>
-                                    </ComboBox>
-
-
-                                    <TextBlock Text="Цвет" Margin="5 10" Grid.Row="2"  Grid.Column="1" VerticalAlignment="Center"/>
-                                    <xctk:ColorPicker x:Name="AdditionalColorPicker" Margin="-10 0 0 0" Width="25" Height="25" VerticalAlignment="Center" ColorMode="ColorCanvas" ShowDropDownButton="False" ShowTabHeaders="False" Grid.Row="2" Grid.Column="2" SelectedColorChanged="ColorPicker_SelectedColorChanged" />
-                                    <CheckBox x:Name="AdditionalWindowsAccentColorCheckBox" Grid.Row="2" Grid.Column="3" VerticalAlignment="Center" Margin="0" Checked="WindowsAccentColorCheckBox_Changed" Unchecked="WindowsAccentColorCheckBox_Changed">
-                                        <TextBlock Text="Использовать цвет Windows" TextWrapping="WrapWithOverflow" Width="auto" />
-                                    </CheckBox>
-
-                                    <TextBlock Text="Раскрасить" Margin="5 0 0 0" Grid.Row="3" Grid.Column="1" VerticalAlignment="Center"/>
-                                    <CheckBox x:Name="AdditionalColorizeCB" Grid.Row="3" Grid.Column="2" Margin="2 2 22 2" Checked="ColorizeCB_Changed" Unchecked="ColorizeCB_Changed" />
-
-                                    <TextBlock Text="Прозрачность" Margin="5 8" Grid.Row="4" Grid.Column="1" VerticalAlignment="Center"/>
-                                    <Slider x:Name="AdditionalAccentAlphaSlider" Margin="3 8" Minimum="0" Maximum="255" Grid.Row="4" Grid.Column="2" Grid.ColumnSpan="2" Thumb.DragCompleted="AccentAlphaSlider_DragCompleted" Thumb.DragStarted="AccentAlphaSlider_DragStarted" ValueChanged="AccentAlphaSlider_ValueChanged" materialDesign:SliderAssist.HideActiveTrack="True"/>
-
-                                    <!--<Button x:Name="EditSwitchButton" Content="Основная панель задач" Margin="5,5,0,0" Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="3" Click="EditSwitchButton_Click"/>-->
-
-                                    <!--<Button x:Name="StartStopButton" Content="Начать" Grid.Row="8" Grid.Column="3" Click="StartStopButton_Click"/>-->
-
-                                </Grid>
-                            </GroupBox>
-
-                            <Button Margin="10 0 10 10">
-                                <Button.Content>
-                                    Начать
-                                </Button.Content>
-                            </Button>
-                        </StackPanel>
-                    </ScrollViewer>
-                </TabItem>
-
-                <TabItem HorizontalAlignment="Right" Style="{StaticResource MaterialDesignNavigationRailTabItem}"  Height="50" Width="50" Margin="0 0 -41 0">
-                    <TabItem.Header>
-                        <materialDesign:PackIcon Kind="TrayArrowDown" Height="25" Width="25" Foreground="Black"/>
-                    </TabItem.Header>
-
-                    <WrapPanel Margin="10">
-                        
-                    </WrapPanel>
-                </TabItem>
-
-                <TabItem HorizontalAlignment="Right" Style="{StaticResource MaterialDesignNavigationRailTabItem}" Height="50" Width="50" >
-                    <TabItem.Header>
-                        <!--<Image Source="Resources/settings.png" materialDesign:ButtonAssist.CornerRadius="5"/>-->
-                        <!--<Image Source="Resources/settings.png" Height="25" Width="25" Margin="0" VerticalAlignment="Center"/>-->
-                        <materialDesign:PackIcon Kind="cog" Height="25" Width="25" Foreground="Black"/>
-                    </TabItem.Header>
-
-                    <StackPanel>
-                        <TextBlock Text="Настройки" FontSize="18" Margin="0 10 0 0" VerticalAlignment="Top" HorizontalAlignment="Center"/>
-
-                        <CheckBox x:Name="StartMinimizedCheckBox" Content="Запустить приложение свёрнутым" FontSize="14" Margin="5 5 0 0" VerticalAlignment="Top" HorizontalAlignment="Left" materialDesign:CheckBoxAssist.CheckBoxSize="23"/>
-                        <CheckBox x:Name="SetWallpapperWhenLaunchedCheckBox" Content="Установить обои при запуске приложения" FontSize="14" Margin="5,5,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" materialDesign:CheckBoxAssist.CheckBoxSize="23"/>
-                        <CheckBox x:Name="StartWhenLaunchedCheckBox" Content="Изменить панель задач при запуске" FontSize="14" Margin="5,5,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" materialDesign:CheckBoxAssist.CheckBoxSize="23"/>
-                        <CheckBox x:Name="UseMaximizedSettingsCheckBox" Content="Разные настройки при развёрнутом окне" FontSize="14" Margin="5,5,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Checked="UseMaximizedSettingsCheckBox_Changed" Unchecked="UseMaximizedSettingsCheckBox_Changed" materialDesign:CheckBoxAssist.CheckBoxSize="23"/>
-                        <CheckBox x:Name="StartWithWindowsCheckBox" Content="Запустить приложение вместе с Windows" Margin="5,5,0,0" FontSize="14" VerticalAlignment="Top" HorizontalAlignment="Left" Checked="StartWithWindowsCheckBox_Changed" Unchecked="StartWithWindowsCheckBox_Changed" materialDesign:CheckBoxAssist.CheckBoxSize="23"/>
-
-                    </StackPanel>
-                </TabItem>
-            </TabControl>
-        </materialDesign:Card>
+                <Button Grid.Row="1"
+                        Grid.Column="2"
+                        Margin="4"
+                        Command="{x:Static materialDesign:DrawerHost.OpenDrawerCommand}"
+                        CommandParameter="{x:Static Dock.Right}"
+                        Content="{materialDesign:PackIcon Kind=ArrowRight}"/>                
+            </Grid>
+        </materialDesign:DrawerHost>
     </Grid>
 </Window>

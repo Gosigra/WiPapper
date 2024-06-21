@@ -64,16 +64,10 @@
             set => _subtitle = value;
         }
 
-        public string ThumbnailURL // изменить, не забыть
+        public string ThumbnailURL
         {
-            get { return _thumbnailURL; }
-            set
-            {
-                //if (value != _ThumbnailURL)
-                //{
-                _thumbnailURL = value;
-                //}
-            }
+            get => _thumbnailURL;
+            set => _thumbnailURL = value;
         }
 
         public string Title

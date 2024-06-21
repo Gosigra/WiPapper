@@ -7,6 +7,7 @@ using CefSharp.Wpf;
 using Newtonsoft.Json;
 using Windows.Media.Control;
 using Windows.Storage.Streams;
+using static Vanara.PInvoke.User32;
 
 namespace WiPapper.Wallpaper.HtmlWallpaper
 {
@@ -15,12 +16,12 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
         public static string oldThumbnailUrl;
         private static readonly MediaProperties mediaProperties = new MediaProperties();
         private static GlobalSystemMediaTransportControlsSession session;
+        private static GlobalSystemMediaTransportControlsSessionManager sessionManager = GlobalSystemMediaTransportControlsSessionManager.RequestAsync().GetAwaiter().GetResult();
 
         public static void IsBrowserInitialized(object sender, DependencyPropertyChangedEventArgs e)
         {
             //(sender as ChromiumWebBrowser).IsBrowserInitializedChanged -= IsBrowserInitialized;
 
-            GlobalSystemMediaTransportControlsSessionManager sessionManager = GlobalSystemMediaTransportControlsSessionManager.RequestAsync().GetAwaiter().GetResult();            
             sessionManager.CurrentSessionChanged += SessionManager_CurrentSessionChanged;
             SetHtmlWallpaper.Browser.FrameLoadEnd += Browser_FrameLoadEnd;
 
@@ -35,6 +36,7 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
                 if (SetHtmlWallpaper.ShowDevTools)
                 {
                     SetHtmlWallpaper.Browser.ShowDevTools();
+                    SetHtmlWallpaper.ShowDevTools = false;
                 }
 
                 if (SetHtmlWallpaper.RecordAudio)
@@ -55,7 +57,7 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
             }
         }
 
-        private static void SessionManager_CurrentSessionChanged(GlobalSystemMediaTransportControlsSessionManager smtc, CurrentSessionChangedEventArgs args) // между разными обектами (браузеры приложения )
+        private static void SessionManager_CurrentSessionChanged(GlobalSystemMediaTransportControlsSessionManager smtc, CurrentSessionChangedEventArgs args)                // между разными обектами (браузеры приложения )
         {
             var currentSession = smtc.GetCurrentSession();
 
