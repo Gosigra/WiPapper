@@ -5,8 +5,6 @@ using System.Numerics;
 using CefSharp;
 using CefSharp.Wpf;
 using NAudio.Wave;
-using Newtonsoft.Json;
-using System.Diagnostics;
 
 namespace WiPapper.Wallpaper.HtmlWallpaper
 {
@@ -15,9 +13,9 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
         public static int Channels { get; set; } = 1;
         public static WasapiLoopbackCapture Capture = new WasapiLoopbackCapture();
 
-        public static void RecordAudioData()                                        // channels, true = 2channels в host определить
+        public static void RecordAudioData()
         {
-            Capture.WaveFormat = new WaveFormat(48000, 16, Channels);                                                                                    // переменную для установки кол-ва каналов и обработку закрытия обоев(остановку записи(проверить может сама остановится при закрытии))
+            Capture.WaveFormat = new WaveFormat(48000, 16, Channels); // переменную для установки кол-ва каналов и обработку закрытия обоев(остановку записи(проверить может сама остановится при закрытии))
 
             Capture.StartRecording();
             Capture.DataAvailable += (s, e) =>
@@ -42,7 +40,7 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
                 leftChannel = GetMonoChannelData(e.Buffer, samplesRecorded, bytesPerSample);
                 rightChannel = null;
             }
-            else                                                                                                        // Предполагается, что количество каналов равно 2
+            else  // Предполагается, что количество каналов равно 2
             {
                 (leftChannel, rightChannel) = GetStereoChannelData(e.Buffer, samplesRecorded, bytesPerSample);
             }
@@ -124,9 +122,7 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
 
         private static void SendAudioData(double[] spectrumData)
         {
-            //string jsonAudioData = JsonConvert.SerializeObject(spectrumData);
             string jsonAudioData = System.Text.Json.JsonSerializer.Serialize(spectrumData);
-            //SetHtmlWallpaper.Browser.ExecuteScriptAsync("wallpaperAudioListener", jsonAudioData);
 
             for (int i = 0; i < MainWindow.WindowList.Count; i++)
             {

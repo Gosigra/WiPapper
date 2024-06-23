@@ -17,32 +17,10 @@ using Microsoft.Win32;
 using static WiPapper.Globals;
 using WiPapper.Wallpaper.HtmlWallpaper;
 using WiPapper.AppOptions;
-using static System.Net.WebRequestMethods;
-using static Supabase.Postgrest.QueryOptions;
-using Supabase;
-using CefSharp.DevTools.WebAuthn;
-using Supabase.Postgrest.Models;
-using Supabase.Postgrest.Attributes;
-using Supabase.Gotrue;
 using System.Diagnostics;
-using System.Xml.Linq;
-using Supabase.Gotrue.Exceptions;
-
-using System.Collections.ObjectModel;
-using System.Windows.Input;
-using Newtonsoft.Json;
-using Windows.System;
 using WiPapper.DB;
-using Newtonsoft.Json.Linq;
-using System.Runtime.InteropServices.ComTypes;
 using System.Text.RegularExpressions;
-using System.Reactive.Subjects;
 
-
-//Получать высоту панели задач и передавать в браузер её + цвет панели чтобы на сайте можно было сделать визуализацию как будто от панели задач столбцы(подумал что можно без высоты и чтобы разработчики сами её писали)
-
-//using static Vanara.PInvoke.User32;
-//using static Vanara.PInvoke.Gdi32;
 
 namespace WiPapper
 {
@@ -51,7 +29,6 @@ namespace WiPapper
     /// </summary>
     public partial class MainWindow : Window
     {
-        // Start with Windows registry key
         // Реестровый ключ для запуска с Windows
         readonly RegistryKey rkApp = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true); //Registry.CurrentUser = HKEY_CURRENT_USER
         NotifyIcon notifyIcon;
@@ -72,22 +49,19 @@ namespace WiPapper
         #endregion
 
         #region Declarations TB
-        // Main window initialization 
         bool WindowInitialized = false;  // Флаг инициализации окна
         readonly string MyPath = Assembly.GetExecutingAssembly().Location;       // Путь к исполняемому файлу
 
-        // Taskbars // Объявление задачи ApplyTask и флага RunApplyTask
+        // Объявление задачи ApplyTask и флага RunApplyTask
         static Task ApplyTask;
         static bool RunApplyTask = false;
         public static bool FindTaskbarHandles = true;
 
         private static bool alphaDragStarted = false;
 
-        // Explorer restarts and Windows Accent Colour changes 
         // Коды сообщений для перезапуска проводника и изменения цвета акцента Windows
         private static readonly uint WM_TASKBARCREATED = User32.RegisterWindowMessage("TaskbarCreated");
 
-        // Window state hook 
         // Хук для отслеживания изменения состояния окна
         private static readonly User32.WinEventProc procDelegate = new User32.WinEventProc(WinEventProc);
         private static User32.HWINEVENTHOOK WindowStateHook;
@@ -103,35 +77,12 @@ namespace WiPapper
 
             SetHtmlWallpaper.StartHttpListener();
 
-            /*
-            * Check monitor numbers and put them in differents Arraylist  
-            * // проверка кол-ва мониторов и помещение в разные массивы
-            * 
-            * ScreenList is used to get the actual resolution of a screen 
-            * //ScreenList используется для получения фактического разрешения экрана.
-            * 
-            * windowList will be used to create 1 window per monitor *Not yet implemented*  
-            * //windowList будет использоваться для создания 1 окна на монитор *еще не реализовано*
-            * 
-            * ButtonList will be used to create dynamically button in order to select and load a file for each monitor *Not yet implemented*  
-            * //ButtonList будет использоваться для динамического создания кнопки для выбора и загрузки файла для каждого монитора *Пока не реализовано*
-            */
-
-
-            
             dataBase.Start();
 
-            DataContext = this; // cprosit
+            DataContext = this;
             FillWallpapersContainer();
 
             FillLists();
-
-
-
-
-
-
-
         }
 
         private async void FillWallpapersContainer()
@@ -185,7 +136,7 @@ namespace WiPapper
             base.OnStateChanged(e);
         }
 
-        private void LoadSettings() //Этот метод позволяет загрузить сохраненные настройки и отразить их в интерфейсе вашего приложения, чтобы пользователь мог видеть текущие значения настроек.
+        private void LoadSettings()                                                                                                 //Этот метод позволяет загрузить сохраненные настройки и отразить их в интерфейсе вашего приложения, чтобы пользователь мог видеть текущие значения настроек.
         {
             OptionsManager.InitializeOptions();
 
@@ -205,7 +156,7 @@ namespace WiPapper
             catch{} //что то сделать
         }
 
-        private void SaveSettings() // Метод для сохранения настроек  //тут сохраняются настройки приложения поэтому надо перенести место сохранения (сохранять не в TaskBarOptions) или переименовать TaskBarOptions тк там все сохраняется или хуй знает
+        private void SaveSettings()                                                                                                                 // Метод для сохранения настроек  //тут сохраняются настройки приложения поэтому надо перенести место сохранения (сохранять не в TaskBarOptions) или переименовать TaskBarOptions тк там все сохраняется или хуй знает
         {
             OptionsManager.Options.Settings.DefaultInstallationPath = DefaultInstallationPath.Text ?? string.Empty;
             OptionsManager.Options.Settings.WallpapperPath = WallpaperPath?.ToString();
@@ -214,8 +165,6 @@ namespace WiPapper
             OptionsManager.Options.StartMinimized = StartMinimizedCheckBox.IsChecked ?? false;
             OptionsManager.Options.SetWallpapperWhenLaunched = SetWallpapperWhenLaunchedCheckBox.IsChecked ?? false;
             OptionsManager.Options.StartWhenLaunched = StartWhenLaunchedCheckBox.IsChecked ?? false;
-            //OptionsManager.Options.UseDifferentSettingsWhenMaximized = UseMaximizedSettingsCheckBox.IsChecked ?? false; //по факту не нужны но для красоты сделать?
-            //OptionsManager.Options.StartWithWindows = StartWithWindowsCheckBox.IsChecked ?? false;
 
             OptionsManager.SerializeOptions();
         }
@@ -243,7 +192,6 @@ namespace WiPapper
 
             WallpaperStretchTypeComboBox.SelectedIndex = OptionsManager.Options.ChooseAFitComboBoxIndex;
 
-            // Listen for name change changes across all processes/threads on current desktop
             // Установка хука для отслеживания изменения состояния окна
             WindowStateHook = User32.SetWinEventHook(User32.EventConstants.EVENT_MIN, User32.EventConstants.EVENT_MAX, IntPtr.Zero, procDelegate, 0, 0, User32.WINEVENT.WINEVENT_OUTOFCONTEXT);
         }
@@ -278,8 +226,6 @@ namespace WiPapper
 
             if (MediaList != null)
             {
-                //media[i].Stop();
-                //mediaList = null;
                 foreach (Window window in WindowList)
                 {
                     window.Close();
@@ -291,14 +237,11 @@ namespace WiPapper
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            //SysTrayIcon.Dispose();    // Освобождение ресурсов, связанных с иконкой системного трея
+            // Освобождение ресурсов, связанных с иконкой системного трея
             notifyIcon.Dispose();
             SaveSettings();
             RunApplyTask = false; // Остановка задачи ApplyTask
             User32.UnhookWinEvent(WindowStateHook); // Отключение хука для отслеживания изменения состояния окна
-
-            //ni.Visible = false;
-
         }
 
         private void Window_Closed(object sender, EventArgs e)
@@ -385,7 +328,8 @@ namespace WiPapper
         private void SetWallpaperButton_Click(object sender, RoutedEventArgs e)
         {
             FindWorkerWindow();
-            if (WallpaperPath == null)            {
+            if (WallpaperPath == null)            
+            {
                 SetWallpaperButton.IsEnabled = false;
                 return;
             }
@@ -809,6 +753,7 @@ namespace WiPapper
             catch (Exception ex)
             {
                 System.Windows.MessageBox.Show(ex.ToString());
+                UploadProgressGrid.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -857,6 +802,16 @@ namespace WiPapper
             FeedbackNameTextBox.Text = null;
             FeedbackSubjectTextBox.Text = null;
             FeedbackBodyTextBox.Text = null;
+        }
+
+        private void CreateWallpaperButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (!Directory.Exists("TemplateWallpaper"))
+            {
+                System.Windows.MessageBox.Show("Если у вас возникла данная ошибка это значит что папки с шаблоном обоев нет. Сообщите о своей ошибке через обратную связь или переустановите приложение", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+            Process.Start("explorer.exe", "TemplateWallpaper");
         }
     }
 }

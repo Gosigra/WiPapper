@@ -68,13 +68,13 @@ namespace WiPapper.DB
         {
             try
             {
-                DataBase.session = await DataBase._supabase.Auth.SignUp(email, password);
+                session = await _supabase.Auth.SignUp(email, password);
                 var model = new UserInfo
                 {
-                    Id = DataBase.session.User.Id,
+                    Id = session.User.Id,
                     Name = name,
                 };
-                await DataBase._supabase.From<UserInfo>().Insert(model);
+                await _supabase.From<UserInfo>().Insert(model);
                 return true;
             }
             catch
@@ -87,9 +87,9 @@ namespace WiPapper.DB
         {
             try
             {
-                DataBase.session = await _supabase.Auth.SignIn(email, password);
+                session = await _supabase.Auth.SignIn(email, password);
 
-                if (DataBase.session != null)
+                if (session != null)
                 {
                     return true;
                 }
@@ -99,17 +99,17 @@ namespace WiPapper.DB
             {
                 if (ex.Message.Contains("Invalid login credentials"))
                 {
-                    System.Windows.MessageBox.Show("Неверные учетные данные или такой пользователь не существует", "Ошибка авторизации", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("Неверные учетные данные или такой пользователь не существует", "Ошибка авторизации", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
                 else
                 {
-                    System.Windows.MessageBox.Show($"Произошла ошибка: {ex.Message}", "Ошибка авторизации", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Произошла ошибка: {ex.Message}", "Ошибка авторизации", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
                 return false;
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show($"Произошла неизвестная ошибка: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Произошла неизвестная ошибка: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
         }
@@ -119,7 +119,7 @@ namespace WiPapper.DB
             string[] preview = Directory.GetFiles(localFolderPath, "preview.*", SearchOption.TopDirectoryOnly);
             if (preview.Length == 0)
             {
-                System.Windows.MessageBox.Show("Добавте превью в папку с обоями");
+                MessageBox.Show("Добавте превью в папку с обоями");
                 return;
             }
             var files = Directory.GetFiles(localFolderPath);
@@ -127,17 +127,17 @@ namespace WiPapper.DB
             foreach (var file in files)
             {
                 string fileName = Path.GetFileName(file);
-                var response = await DataBase._supabase.Storage
+                var response = await _supabase.Storage
                     .From($"Wallpapers/{supabaseFolderPath}")
-                    .Upload(file, fileName, null);                                              //onProgress: (s, progress) => Debug.WriteLine($"{progress}%")
+                    .Upload(file, fileName, null);
 
                 if (file.Contains("preview"))
                 {
-                    var publicUrl = DataBase._supabase.Storage
+                    var publicUrl = _supabase.Storage
                         .From("Wallpapers")
                         .GetPublicUrl($"{supabaseFolderPath}/{fileName}");
 
-                    var result = await DataBase._supabase.Rpc("append_to_array", new { idd = userId, newelement = publicUrl });
+                    var result = await _supabase.Rpc("append_to_array", new { idd = userId, newelement = publicUrl });
                 }
             }
 

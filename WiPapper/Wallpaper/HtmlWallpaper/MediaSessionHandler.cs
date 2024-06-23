@@ -71,6 +71,7 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
             if (session != null)
             {
                 session.MediaPropertiesChanged -= Session_MediaPropertiesChanged;
+                session.PlaybackInfoChanged -= Session_PlaybackInfoChanged;
             }
 
             // Обновление объекта session и подписка на событие нового объекта session
@@ -78,10 +79,17 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
             if (session != null)
             {
                 session.MediaPropertiesChanged += Session_MediaPropertiesChanged;
+                session.PlaybackInfoChanged += Session_PlaybackInfoChanged;
+
             }
         }
 
         private static void Session_MediaPropertiesChanged(GlobalSystemMediaTransportControlsSession session, MediaPropertiesChangedEventArgs args)
+        {
+            UpdateDetails();
+        }
+
+        private static void Session_PlaybackInfoChanged(GlobalSystemMediaTransportControlsSession session, PlaybackInfoChangedEventArgs args)
         {
             UpdateDetails();
         }

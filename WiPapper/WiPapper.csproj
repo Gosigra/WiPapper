@@ -74,6 +74,9 @@
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Resources\1.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -114,9 +117,6 @@
     <Compile Include="Wallpaper\HtmlWallpaper\HtmlWallpaperSetter.cs" />
     <Compile Include="Wallpaper\HtmlWallpaper\MediaProperties.cs" />
     <Compile Include="Wallpaper\HtmlWallpaper\MediaSessionHandler.cs" />
-    <Compile Include="Window1.xaml.cs">
-      <DependentUpon>Window1.xaml</DependentUpon>
-    </Compile>
     <Compile Include="TaskBar\WindowsAccentColor.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -131,10 +131,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="WallpaperMiniature.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Window1.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

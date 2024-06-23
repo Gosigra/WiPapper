@@ -68,7 +68,7 @@
                                 </TabControl>
 
                                 <StackPanel x:Name="UserAutorizedPanel" Visibility="Collapsed" >
-                                    <Button x:Name="UploadButton" Content="Загрузить" Margin="20" Width="100" HorizontalAlignment="Left" Click="UploadButton_Click"/>
+                                    <Button x:Name="UploadButton" Content="Загрузить обои" Margin="20" Width="100" HorizontalAlignment="Left" Click="UploadButton_Click"/>
                                 </StackPanel>
                             </Grid>
                         </Border>
@@ -108,6 +108,7 @@
                                     <RowDefinition Height="auto"/>
                                     <RowDefinition Height="auto"/>
                                     <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="*"/>
                                     <RowDefinition Height="5px"/>
                                 </Grid.RowDefinitions>
 
@@ -125,6 +126,18 @@
                                     <ComboBoxItem>По размеру</ComboBoxItem>
                                     <ComboBoxItem>Заполнение</ComboBoxItem>
                                 </ComboBox>
+
+                                <Button x:Name="CreateWallpaperButton"
+                                        Content="Создать обои"
+                                        Width="130"                                        
+                                        Margin="0 0 0 -5"
+                                        Grid.Row="9"
+                                        Grid.Column="3"
+                                        Grid.ColumnSpan="2"
+                                        FontSize="14"
+                                        VerticalAlignment="Bottom"                                        
+                                        Style="{StaticResource MaterialDesignFlatLightButton}"                                        
+                                        materialDesign:ElevationAssist.Elevation="Dp0" Click="CreateWallpaperButton_Click"/>
                             </Grid>
                         </Border>
                     </Grid>
@@ -228,8 +241,6 @@
 
                 <TabItem HorizontalAlignment="Right" Style="{StaticResource MaterialDesignNavigationRailTabItem}" Height="50" Width="50">
                     <TabItem.Header>
-                        <!--<Image Source="Resources/settings.png" materialDesign:ButtonAssist.CornerRadius="5"/>-->
-                        <!--<Image Source="Resources/settings.png" Height="25" Width="25" Margin="0" VerticalAlignment="Center"/>-->
                         <materialDesign:PackIcon Kind="cog" Height="25" Width="25" Foreground="Black"/>
                     </TabItem.Header>
                     
