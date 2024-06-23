@@ -75,6 +75,7 @@ namespace WiPapper.DB
                     Name = name,
                 };
                 await _supabase.From<UserInfo>().Insert(model);
+                await Authorize(email, password);
                 return true;
             }
             catch
