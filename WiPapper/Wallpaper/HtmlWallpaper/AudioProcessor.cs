@@ -5,6 +5,7 @@ using System.Numerics;
 using CefSharp;
 using CefSharp.Wpf;
 using NAudio.Wave;
+using System.Text.RegularExpressions;
 
 namespace WiPapper.Wallpaper.HtmlWallpaper
 {
@@ -15,7 +16,7 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
 
         public static void RecordAudioData()
         {
-            Capture.WaveFormat = new WaveFormat(48000, 16, Channels); // переменную для установки кол-ва каналов и обработку закрытия обоев(остановку записи(проверить может сама остановится при закрытии))
+            Capture.WaveFormat = new WaveFormat(48000, 16,Channels); // переменную для установки кол-ва каналов и обработку закрытия обоев(остановку записи(проверить может сама остановится при закрытии))        
 
             Capture.StartRecording();
             Capture.DataAvailable += (s, e) =>

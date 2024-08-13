@@ -265,7 +265,7 @@
                                 </Button>
 
 
-                                <TextBox x:Name="FeedbackNameTextBox" Margin="5" materialDesign:HintAssist.Hint="Имя" Padding="5" Style="{StaticResource  MaterialDesignOutlinedTextBox}"/>
+                                <TextBox x:Name="FeedbackNameTextBox" Margin="5" materialDesign:HintAssist.Hint="Почта" Padding="5" Style="{StaticResource  MaterialDesignOutlinedTextBox}"/>
 
                                 <TextBox x:Name="FeedbackSubjectTextBox" Margin="5" materialDesign:HintAssist.Hint="Тема" Padding="5" Style="{StaticResource  MaterialDesignOutlinedTextBox}"/>
 

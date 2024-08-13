@@ -14,9 +14,6 @@ namespace WiPapper.DB
 {
     public class DataBase
     {
-        const string SUPABASE_URL = "https://kswefyoocehyihrohpqj.supabase.co";
-        const string SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtzd2VmeW9vY2VoeWlocm9ocHFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc2Nzg1MjgsImV4cCI6MjAzMzI1NDUyOH0.8b_eNchjg7RdcE_7lw8qp4u9YxMW6j2YgHAOK58hioE";
-
         public static Session session;
         public static Supabase.Client _supabase;
 
@@ -29,7 +26,7 @@ namespace WiPapper.DB
                 AutoConnectRealtime = true
             };
 
-            _supabase = new Supabase.Client(SUPABASE_URL, SUPABASE_KEY, options);
+            _supabase = new Supabase.Client(SupabaseKeys.SUPABASE_URL, SupabaseKeys.SUPABASE_KEY, options);
             _supabase.InitializeAsync().GetAwaiter();
         }
 

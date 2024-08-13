@@ -780,10 +780,10 @@ namespace WiPapper
         private void SendEmailButton_Click(object sender, RoutedEventArgs e)
         {
             string name = FeedbackNameTextBox.Text;
-            string email = FeedbackSubjectTextBox.Text;
+            string subject = FeedbackSubjectTextBox.Text;
             string message = FeedbackBodyTextBox.Text;
 
-            if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(message))
+            if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(subject) || string.IsNullOrEmpty(message))
             {
                 System.Windows.MessageBox.Show("Пожалуйста заполните все поля.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
@@ -791,7 +791,7 @@ namespace WiPapper
 
             try
             {
-                Feedback.SendEmail(name, email, message);
+                Feedback.SendEmail(name, subject, message);
                 System.Windows.MessageBox.Show("Ваше сообщение отправлено.", "Успешно", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)

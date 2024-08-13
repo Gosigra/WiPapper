@@ -7,7 +7,6 @@ using CefSharp.Wpf;
 using Newtonsoft.Json;
 using Windows.Media.Control;
 using Windows.Storage.Streams;
-using static Vanara.PInvoke.User32;
 
 namespace WiPapper.Wallpaper.HtmlWallpaper
 {
