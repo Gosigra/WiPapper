@@ -1,4 +1,4 @@
-# 🖥️ Animated Desktop & Taskbar Customization App  
+# 🖥️ WiPapper
 
 An application that allows you to set **animated desktop wallpapers** and customize the **taskbar**.  
 
