@@ -5,7 +5,7 @@ using Vanara.PInvoke;
 namespace Extensions
 {
     #region Enums
-    public enum AccentState //Это перечисление, представляющее различные состояния акцентирования (цветовой схемы) в Windows.
+    public enum AccentState //Состояния акцентирования (цветовой схемы) в Windows.
     {
         ACCENT_DISABLED = 0,
         ACCENT_ENABLE_GRADIENT = 1,
@@ -14,16 +14,15 @@ namespace Extensions
         ACCENT_INVALID_STATE = 4
     }
 
-    public enum WindowsCompositionAttribute // перечисление которое связано с атрибутами композиции окна
+    public enum WindowsCompositionAttribute
     {
         WCA_ACCENT_POLICY = 19
     }
     #endregion
 
     #region Structs
-    [StructLayout(LayoutKind.Sequential)] // здесь указывается как должны храниться в памяти элементы структуры,
-                                          // в данном случае они будут распологаться в порядке объявления
-    public struct AccentPolicy // эта структура представляет параметры акцентирования(цветовой схемы) в windows
+    [StructLayout(LayoutKind.Sequential)]
+    public struct AccentPolicy
     {
         public AccentState AccentState;
         public int AccentFlags;
@@ -40,7 +39,7 @@ namespace Extensions
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct WindowCompositionAttribData // эта структура связана с данными о совместимости и прозрачности окна
+    public struct WindowCompositionAttribData
     {
         public WindowsCompositionAttribute Attribute;
         public IntPtr Data;
@@ -58,7 +57,7 @@ namespace Extensions
     public static class SWCA
     {
         [DllImport("user32.dll", SetLastError = true)]
-        public static extern int SetWindowCompositionAttribute(HWND hwnd, ref WindowCompositionAttribData data); //Этот метод используется для установки атрибутов композиции окна, таких как акцент и прозрачность.
+        public static extern int SetWindowCompositionAttribute(HWND hwnd, ref WindowCompositionAttribData data);   //Этот метод используется для установки атрибутов композиции окна, таких как акцент и прозрачность.
     }                                                                                                              //Он вызывает функцию SetWindowCompositionAttribute из user32.dll и принимает структуру WinCompatTrData
                                                                                                                    //в качестве параметра.
 

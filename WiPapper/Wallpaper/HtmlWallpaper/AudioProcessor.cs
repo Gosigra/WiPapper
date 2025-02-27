@@ -16,7 +16,7 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
 
         public static void RecordAudioData()
         {
-            Capture.WaveFormat = new WaveFormat(48000, 16,Channels); // переменную для установки кол-ва каналов и обработку закрытия обоев(остановку записи(проверить может сама остановится при закрытии))        
+            Capture.WaveFormat = new WaveFormat(48000, 16, Channels);     
 
             Capture.StartRecording();
             Capture.DataAvailable += (s, e) =>
@@ -41,7 +41,7 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
                 leftChannel = GetMonoChannelData(e.Buffer, samplesRecorded, bytesPerSample);
                 rightChannel = null;
             }
-            else  // Предполагается, что количество каналов равно 2
+            else
             {
                 (leftChannel, rightChannel) = GetStereoChannelData(e.Buffer, samplesRecorded, bytesPerSample);
             }

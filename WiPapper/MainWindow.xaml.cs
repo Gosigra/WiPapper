@@ -30,12 +30,11 @@ namespace WiPapper
     public partial class MainWindow : Window
     {
         // Реестровый ключ для запуска с Windows
-        readonly RegistryKey rkApp = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true); //Registry.CurrentUser = HKEY_CURRENT_USER
+        readonly RegistryKey rkApp = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
         NotifyIcon notifyIcon;
 
         DataBase dataBase = new DataBase();
         
-
         #region wlp
         public static List<Rectangle> ScreenList;
         public static List<Window> WindowList;
@@ -49,10 +48,9 @@ namespace WiPapper
         #endregion
 
         #region Declarations TB
-        bool WindowInitialized = false;  // Флаг инициализации окна
-        readonly string MyPath = Assembly.GetExecutingAssembly().Location;       // Путь к исполняемому файлу
+        bool WindowInitialized = false;                                     // Флаг инициализации окна
+        readonly string MyPath = Assembly.GetExecutingAssembly().Location;  // Путь к исполняемому файлу
 
-        // Объявление задачи ApplyTask и флага RunApplyTask
         static Task ApplyTask;
         static bool RunApplyTask = false;
         public static bool FindTaskbarHandles = true;
@@ -97,18 +95,18 @@ namespace WiPapper
             MediaList = new List<MediaElement>();
             foreach (var item in Screen.AllScreens)
             {
-                ScreenList.Add(item.Bounds);                                                                                                 //получаю рабочий стол и его рабочую область ({X = 0 Y = 0 Width = 1920 Height = 1040}) //working area
+                ScreenList.Add(item.Bounds);
             }
             for (int i = 0; i < ScreenList.Count; i++)
             {
-                WindowList.Add(new Window());                                                                                                                //здесь кол-во экранов
+                WindowList.Add(new Window());
                 MediaList.Add(new MediaElement());
             }
         }
 
         private void InitializeNotifyIcon()
         {
-            notifyIcon = new NotifyIcon();                                                                                                     // Инициализация иконки системного трея
+            notifyIcon = new NotifyIcon();
             Stream iconStream = System.Windows.Application.GetResourceStream(new Uri("Resources/1.ico", UriKind.Relative)).Stream;
             notifyIcon.Icon = new Icon(iconStream);
             notifyIcon.Click += (object sender, EventArgs args) =>
@@ -118,7 +116,7 @@ namespace WiPapper
             };
         }
 
-        protected override void OnStateChanged(EventArgs e) // Уведомление о сворачивании
+        protected override void OnStateChanged(EventArgs e)
         {
             if(WindowState == WindowState.Minimized)
             {
@@ -126,7 +124,6 @@ namespace WiPapper
                 notifyIcon.BalloonTipText = "WiPapper было свёрнуто";
                 notifyIcon.Visible = true;
                 notifyIcon.ShowBalloonTip(10000);
-                //ni.ShowBalloonTip(10000, "WiPaper", "WiPaper было свёрнуто", ToolTipIcon.Info);
                 Hide();
             }
             else if (WindowState.Normal == this.WindowState)
@@ -136,7 +133,7 @@ namespace WiPapper
             base.OnStateChanged(e);
         }
 
-        private void LoadSettings()                                                                                                 //Этот метод позволяет загрузить сохраненные настройки и отразить их в интерфейсе вашего приложения, чтобы пользователь мог видеть текущие значения настроек.
+        private void LoadSettings()
         {
             OptionsManager.InitializeOptions();
 
@@ -153,10 +150,10 @@ namespace WiPapper
             {
                 WallpaperPath = new Uri(OptionsManager.Options.Settings.WallpapperPath);
             }
-            catch{} //что то сделать
+            catch {}
         }
 
-        private void SaveSettings()                                                                                                                 // Метод для сохранения настроек  //тут сохраняются настройки приложения поэтому надо перенести место сохранения (сохранять не в TaskBarOptions) или переименовать TaskBarOptions тк там все сохраняется или хуй знает
+        private void SaveSettings()
         {
             OptionsManager.Options.Settings.DefaultInstallationPath = DefaultInstallationPath.Text ?? string.Empty;
             OptionsManager.Options.Settings.WallpapperPath = WallpaperPath?.ToString();
@@ -169,7 +166,7 @@ namespace WiPapper
             OptionsManager.SerializeOptions();
         }
 
-        private void Window_ContentRendered(object sender, EventArgs e) //7  Общая цель этого метода - инициализировать ваше окно и выполнить необходимые действия после его отображения, включая загрузку настроек, установку начального состояния окна и настройку прослушивания событий.
+        private void Window_ContentRendered(object sender, EventArgs e)
         {
             LoadSettings();
             WindowInitialized = true;
@@ -237,11 +234,10 @@ namespace WiPapper
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            // Освобождение ресурсов, связанных с иконкой системного трея
             notifyIcon.Dispose();
             SaveSettings();
-            RunApplyTask = false; // Остановка задачи ApplyTask
-            User32.UnhookWinEvent(WindowStateHook); // Отключение хука для отслеживания изменения состояния окна
+            RunApplyTask = false;
+            User32.UnhookWinEvent(WindowStateHook);
         }
 
         private void Window_Closed(object sender, EventArgs e)
@@ -313,7 +309,6 @@ namespace WiPapper
             switch (rezult)
             {
                 case System.Windows.Forms.DialogResult.OK:
-                    //file = fileDialog.FileName;
                     WallpaperPath = new Uri(fileDialog.FileName);
                     SetWallpaperButton.IsEnabled = true;
                     break;
@@ -405,13 +400,14 @@ namespace WiPapper
         #endregion
 
         #region TaskBar
-        private void ApplyToAllTaskbars() // панель задач одна так что хз проверить с 2 мониками
+        private void ApplyToAllTaskbars()
         {
             Taskbars.Bars = new List<Taskbar>();
 
-            while (RunApplyTask) // Бесконечный цикл, выполняющийся в отдельном потоке, пока RunApplyTask равно true
+            while (RunApplyTask)
             {
-                if (FindTaskbarHandles) // Если нужно искать дескрипторы панелей задач
+                //Поиск дескрипторов панелей задач
+                if (FindTaskbarHandles) 
                 {
                     Taskbars.Bars.Add(new Taskbar(User32.FindWindow("Shell_TrayWnd", null))); // Добавление главной панели задач в список
                     HWND otherBars = IntPtr.Zero;
@@ -424,79 +420,72 @@ namespace WiPapper
                         else { Taskbars.Bars.Add(new Taskbar(otherBars)); }
                     }
 
-                    FindTaskbarHandles = false; // Завершение поиска дескрипторов панелей задач
+                    FindTaskbarHandles = false;
 
-                    App.Current.Dispatcher.Invoke(() => UpdateAllTBSettings()); // Обновление всех настроек для добавленных панелей задач
+                    // Обновление всех настроек для добавленных панелей задач
+                    App.Current.Dispatcher.Invoke(() => UpdateAllTBSettings());
                 }
 
-                if (Taskbars.MaximizedStateChanged) // Если изменилось состояние максимизации окон
+                if (Taskbars.MaximizedStateChanged)
                 {
                     Taskbars.UpdateMaximizedState();
                     Taskbars.UpdateAllSettings();
                 }
 
-                foreach (Taskbar taskbar in Taskbars.Bars) // Применение стилей для каждой панели задачи
+                foreach (Taskbar taskbar in Taskbars.Bars)
                 {
                     Taskbars.ApplyStyles(taskbar);
                 }
 
-                Thread.Sleep(10); // Задержка на 10 миллисекунд
+                Thread.Sleep(10);
             }
         }
 
-        protected override void OnSourceInitialized(EventArgs e) //5 //переопределяет базовый метод OnSourceInitialized в классе Window.Этот метод вызывается, когда инициализируется источник окна, то есть когда окно было создано и готово к отображению.
+        protected override void OnSourceInitialized(EventArgs e)
         {
-            base.OnSourceInitialized(e); //В контексте WPF, класс Window имеет событие SourceInitialized, которое срабатывает, когда источник окна был инициализирован.
-                                         //Если вы переопределяете метод OnSourceInitialized в производном классе, вызов base.OnSourceInitialized(e) гарантирует, что все обработчики событий SourceInitialized в базовом классе Window также будут вызваны.
-                                         //Это важно, потому что базовый класс может иметь важную логику, связанную с этим событием, которую нужно выполнить.
-                                         //Если вы не вызовете base.OnSourceInitialized(e), эта логика будет пропущена, что может привести к непредвиденным последствиям.
+            base.OnSourceInitialized(e);
 
-            IntPtr mainWindowPtr = new WindowInteropHelper(this).Handle; //Этот код создает переменную mainWindowPtr, которая будет содержать дескриптор окна (Window Handle) вашего WPF окна (this). Дескриптор окна - это числовое значение, которое уникально идентифицирует окно в операционной системе Windows.
-            HwndSource mainWindowSrc = HwndSource.FromHwnd(mainWindowPtr); //Общий сценарий использования HwndSource заключается в интеграции элементов WPF в существующий Win32 или WinAPI код, где HwndSource позволяет вам связать оконный дескриптор и ресурсы WPF, обеспечивая совместимость между двумя подходами в построении графических интерфейсов.
-            mainWindowSrc.AddHook(WndProc); // В вашем коде mainWindowSrc.AddHook(WndProc); вы регистрируете метод WndProc в качестве обработчика оконных сообщений для окна, на которое ссылается mainWindowSrc. Это позволяет вашему WPF окну получать и обрабатывать низкоуровневые оконные сообщения, которые в противном случае могли бы быть обработаны стандартным оконной процедурой WinAPI.(кароче система отправляет сообщения хук их перехватывает так сказать, а wndproc это обработцик этих сообщений)
+            IntPtr mainWindowPtr = new WindowInteropHelper(this).Handle;   //Дескриптор текущего WPF окна
+            HwndSource mainWindowSrc = HwndSource.FromHwnd(mainWindowPtr); // Создание источника оконных сообщений для интеграции WPF с WinAPI
+            mainWindowSrc.AddHook(WndProc);
         }
 
-        private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled) //6 // Обработчик сообщений окна //5161151515115
+        private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled) //Обработчик окннных сообщений
         {
-            if (msg == WM_TASKBARCREATED) // Если получено сообщение о создании панели задач // это системное сообщение, которое операционная система Windows отправляет всем окнам, когда создается новая панель задач.
+            if (msg == WM_TASKBARCREATED) // Панель задач была создана (системное сообщение)
             {
-                FindTaskbarHandles = true; // Установка флага для поиска дескрипторов панелей задач
+                FindTaskbarHandles = true;
                 handled = true;
             }
-            else if (msg == (int)User32.WindowMessage.WM_DWMCOLORIZATIONCOLORCHANGED) // Если получено сообщение об изменении цвета акцента Windows
+            else if (msg == (int)User32.WindowMessage.WM_DWMCOLORIZATIONCOLORCHANGED) // Изменение цвета акцента Windows
             {
-                Globals.WindowsAccentColor = WindowsAccentColor.GetColorAsInt(); // TODO: use colour from wParam 
-                                                                                 // Обновление цвета акцента
+                Globals.WindowsAccentColor = WindowsAccentColor.GetColorAsInt(); // Обновление цвета акцента
                 handled = true;
             }
 
             return IntPtr.Zero;
-
-            //Таким образом, хотя ваше приложение в основном обрабатывает сообщения, связанные с его собственным окном, оно также может обрабатывать определенные системные сообщения, такие как WM_TASKBARCREATED, которые относятся к глобальным событиям в операционной системе. Это позволяет вашему приложению реагировать на изменения в системе, такие как создание новой панели задач.
         }
 
-        static void WinEventProc(User32.HWINEVENTHOOK hWinEventHook, uint winEvent, HWND hwnd, int idObject, int idChild, uint idEventThread, uint dwmsEventTime) //В целом, этот метод служит для отслеживания и получения информации о параметрах окна, связанных с событием, которое вызвало этот обработчик событий. Полученная информация может быть использована для дальнейшей обработки события в вашем приложении. //ничё не понял очень долгий цикл, но скорее всего это тот хук и он постоянно работает
-        {  // не надо по моим ощущениям (просто проверяет все окна по их состояниям )           
+        static void WinEventProc(User32.HWINEVENTHOOK hWinEventHook, uint winEvent, HWND hwnd, int idObject, int idChild, uint idEventThread, uint dwmsEventTime)
+        {           
             User32.WINDOWPLACEMENT placement = new User32.WINDOWPLACEMENT();
             placement.length = (uint)Marshal.SizeOf(placement);
             User32.GetWindowPlacement(hwnd, ref placement);
 
-            // Window is closing
             // Если окно закрывается
             if (idObject == -2 && idChild == 5)
             {
-                if (MaximizedWindows.Contains(hwnd)) // Если окно было максимизировано
+                if (MaximizedWindows.Contains(hwnd))
                 {
                     LastClosedWindow = hwnd;
                     LastClosedWindowTime = DateTime.Now;
                     MaximizedWindows.Remove(hwnd);
-                    Taskbars.MaximizedStateChanged = true; // Установка флага изменения состояния максимизации
+                    Taskbars.MaximizedStateChanged = true;
                 }
             }
-            // Если окно максимизировано
-            else if (placement.showCmd == ShowWindowCommand.SW_MAXIMIZE || placement.showCmd == ShowWindowCommand.SW_SHOWMAXIMIZED) //В общем, этот код служит для отслеживания состояния максимизации окон и выполнения действий в зависимости от этого состояния, включая запись информации о максимизированных окнах и возможное изменение состояния максимизации.
+            else if (placement.showCmd == ShowWindowCommand.SW_MAXIMIZE || placement.showCmd == ShowWindowCommand.SW_SHOWMAXIMIZED)
             {
-                if (!MaximizedWindows.Contains(hwnd)) // Если окно не было добавлено в список максимизированных окон
+                if (!MaximizedWindows.Contains(hwnd))
                 {
                     if (LastClosedWindow == hwnd && ((TimeSpan)(DateTime.Now - LastClosedWindowTime)).TotalSeconds < 1) { return; }
 
@@ -504,17 +493,17 @@ namespace WiPapper
                     Taskbars.MaximizedStateChanged = true;
                 }
             }
-            else if (placement.showCmd == ShowWindowCommand.SW_NORMAL) // Если окно в обычном состоянии
+            else if (placement.showCmd == ShowWindowCommand.SW_NORMAL)
             {
-                if (MaximizedWindows.Contains(hwnd)) // Если окно было максимизировано
+                if (MaximizedWindows.Contains(hwnd))
                 {
                     MaximizedWindows.Remove(hwnd);
                     Taskbars.MaximizedStateChanged = true;
                 }
             }
-            else if (placement.showCmd == ShowWindowCommand.SW_SHOWMINIMIZED || placement.showCmd == ShowWindowCommand.SW_MINIMIZE) // Если окно свернуто
+            else if (placement.showCmd == ShowWindowCommand.SW_SHOWMINIMIZED || placement.showCmd == ShowWindowCommand.SW_MINIMIZE)
             {
-                if (MaximizedWindows.Contains(hwnd)) // Если окно было максимизировано
+                if (MaximizedWindows.Contains(hwnd))
                 {
                     MaximizedWindows.Remove(hwnd);
                     Taskbars.MaximizedStateChanged = true;
@@ -522,7 +511,7 @@ namespace WiPapper
             }
         }
 
-        private void UpdateAllTBSettings() // Обновление всех настроек, включая акцент, цвет, флаги и пр. TaskBar
+        private void UpdateAllTBSettings()
         {
             SetAccentState(AccentComboBox.SelectedIndex);
             SetTaskbarColor(ColorPicker.SelectedColor ?? System.Windows.Media.Color.FromArgb(255, 255, 255, 255));
@@ -530,27 +519,26 @@ namespace WiPapper
             WindowsAccentColorCheckBox_Changed(null, null);
             SetWindowsAccentAlpha((byte)AccentAlphaSlider.Value);
 
-            Taskbars.UpdateAllSettings(); // Обновление настроек для всех панелей задач
+            Taskbars.UpdateAllSettings();
         }
 
-        private void SwitchTaskbarBeingEdited(string switchTo) //Этот метод служит для изменения контекста редактирования панели задачи в вашем приложении и обновления элементов управления, связанных с этим контекстом.
+        private void SwitchTaskbarBeingEdited(string switchTo)
         {
-            TaskbarBeingEdited = switchTo;  // Изменение контекста редактирования
-            ShowTaskbarSettings(TaskbarBeingEdited); // Отображение настроек выбранной панели задачи
+            TaskbarBeingEdited = switchTo;
+            ShowTaskbarSettings(TaskbarBeingEdited);
 
             if (TaskbarBeingEdited == "Main")
             {
                 EditSwitchTextBlock.Text = "Основная панель задач";
             }
-            else if (TaskbarBeingEdited == "Maximized") //additional
+            else if (TaskbarBeingEdited == "Maximized")
             {
                 EditSwitchTextBlock.Text = "Дополнительная панель задач";
             }
         }
 
-        private void ShowTaskbarSettings(string tb) //Этот метод позволяет отобразить настройки главной панели задачи в интерфейсе вашего приложения, чтобы пользователь мог видеть текущие значения настроек и, возможно, их изменить.
+        private void ShowTaskbarSettings(string tb)
         {
-            // Отображение настроек выбранной панели задачи в интерфейсе приложения
             if (tb == "Main")
             {
                 AccentComboBox.SelectedIndex = OptionsManager.Options.Settings.MainTaskbarStyle.AccentState;
@@ -570,14 +558,14 @@ namespace WiPapper
         }
 
         #region Events
-        private void AccentComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e) //Общая цель этого обработчика события - реагировать на изменение выбранного элемента в AccentStateComboBox и выполнить какие-либо действия на основе этого изменения, возможно, изменить параметры приложения связанные с AccentState.
-        {   // Обработчик события изменения выбранного элемента в AccentStateComboBox
+        private void AccentComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e) 
+        {
             if (!WindowInitialized) return;
             SetAccentState(AccentComboBox.SelectedIndex);
         }
 
         private void ColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<System.Windows.Media.Color?> e)
-        {   // Обработчик события изменения выбранного цвета в GradientColorPicker
+        {
             if (!WindowInitialized) return;
 
             SetTaskbarColor(ColorPicker.SelectedColor ?? System.Windows.Media.Color.FromArgb(255, 255, 255, 255));
@@ -589,34 +577,33 @@ namespace WiPapper
 
             if (!WindowInitialized) return;
 
-            bool use = WindowsAccentColorCheckBox.IsChecked ?? false; //4564165456465468546584646864846846894896984498
+            bool use = WindowsAccentColorCheckBox.IsChecked ?? false;
             SetUseAccentColor(use);
-            //GradientColorPicker.IsEnabled = !use;
         }
 
         private void ColorizeCB_Changed(object sender, RoutedEventArgs e)
-        {   // Обработчик события изменения состояния флажка ColorizeBlurCheckBox
+        {
             if (!WindowInitialized) return;
             SetAccentFlags(ColorizeCB.IsChecked ?? false);
         }
 
         private void AccentAlphaSlider_DragCompleted(object sender, RoutedEventArgs e)
-        {   // Обработчик события завершения перетаскивания ползунка WindowsAccentAlphaSlider
+        {
             alphaDragStarted = false;
             SetWindowsAccentAlpha((byte)AccentAlphaSlider.Value);
         }
 
         private void AccentAlphaSlider_DragStarted(object sender, RoutedEventArgs e)
-        {   // Обработчик события начала перетаскивания ползунка WindowsAccentAlphaSlider
+        {
             alphaDragStarted = true;
         }
 
-        private void AccentAlphaSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) // по факту нахуй не надо, но я думаю добавить поле где человек может вручную написать проценты а не ползунком 
-        {   // Обработчик события изменения значения ползунка WindowsAccentAlphaSlider
+        private void AccentAlphaSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
             if (!WindowInitialized) return;
-            if (!alphaDragStarted) // Если убрать ! то будет в режиме реального времени (но хз мешает чемуто или памяти мнгого или тд хз почему так сделал чел)  // проверял там аль размытие лагало вернул "!"
+            if (!alphaDragStarted)
             {
-                //SetWindowsAccentAlpha((byte)AccentAlphaSlider.Value);
+                SetWindowsAccentAlpha((byte)AccentAlphaSlider.Value);
             }
         }
 
@@ -632,7 +619,7 @@ namespace WiPapper
             }
         }
 
-        private void StartStopButton_Click(object sender, RoutedEventArgs e) // Обработчик события нажатия кнопки Start/Stop
+        private void StartStopButton_Click(object sender, RoutedEventArgs e)
         {
             if (RunApplyTask)
             {
@@ -645,7 +632,7 @@ namespace WiPapper
                 RunApplyTask = true;
                 FindTaskbarHandles = true;
 
-                ApplyTask = new Task(() => ApplyToAllTaskbars()); // Создание и запуск задачи ApplyToAllTaskbars
+                ApplyTask = new Task(() => ApplyToAllTaskbars());
                 ApplyTask.Start();
 
             }
@@ -653,9 +640,6 @@ namespace WiPapper
         #endregion
 
         #endregion
-
-
-
 
         private async void AuthorizeButton_Click(object sender, RoutedEventArgs e)
         {
@@ -705,13 +689,11 @@ namespace WiPapper
 
             try
             {
-                // Проверка с помощью регулярного выражения
                 string pattern = @"^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$";
                 return Regex.IsMatch(email, pattern);
             }
             catch
             {
-                // Если произошла ошибка при проверке, считаем адрес недействительным
                 return false;
             }
         }

@@ -44,7 +44,6 @@ namespace WiPapper.DB
             {
                 if (userInfo.ContainsKey("URLToWallpaper") && userInfo["URLToWallpaper"] is JArray wallpaperArray && wallpaperArray.Count > 0)
                 {
-                    //string name = userInfo["name"].ToString();
                     foreach (var item in wallpaperArray)
                     {
                         ImageDetails imageDetails = new ImageDetails
@@ -139,7 +138,6 @@ namespace WiPapper.DB
                 }
             }
 
-            // Рекурсивная обработка подкаталогов
             foreach (var directory in directories)
             {
                 string folderName = Path.GetFileName(directory);

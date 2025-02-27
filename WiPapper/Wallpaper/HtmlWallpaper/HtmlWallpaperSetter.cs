@@ -7,7 +7,7 @@ using CefSharp.Wpf;
 
 namespace WiPapper.Wallpaper.HtmlWallpaper
 {
-    public static class SetHtmlWallpaper // сделать не статик
+    public static class SetHtmlWallpaper
     {
         public static bool UsePowerMethod { get; set; }
         public static ChromiumWebBrowser Browser { get; set; }

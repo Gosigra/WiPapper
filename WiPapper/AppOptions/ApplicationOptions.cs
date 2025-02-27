@@ -1,8 +1,8 @@
 ﻿namespace WiPapper.AppOptions
 {
-    [System.SerializableAttribute()] // Атрибут, указывающий, что класс Options может быть сериализован. Этот атрибут может использоваться фреймворком для определения того, как обрабатывать этот класс при сериализации и десериализации.
-    [System.ComponentModel.DesignerCategoryAttribute("code")] //Атрибут, указывающий категорию, к которой относится класс в дизайнере.
-    public partial class Options // Объявление класса Options, который представляет настройки. //partical не надо как будто
+    [System.SerializableAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    public partial class Options
     {
         private bool _startMinimizedField;
 
@@ -10,15 +10,15 @@
 
         private bool _startWhenLaunchedField;
 
-        private bool _useDifferentSettingsWhenMaximizedField; // это опции приложения
+        private bool _useDifferentSettingsWhenMaximizedField;
 
         private bool _startWithWindowsField;
 
         private byte _chooseAFitComboBoxIndex;
 
-        private OptionsSettings _settingsField; //Приватное поле settingsField для хранения объекта OptionsSettings.
+        private OptionsSettings _settingsField;
 
-        public bool StartMinimized //Свойство для доступа к параметру "StartMinimized". Возвращает startMinimizedField и устанавливает его значение.
+        public bool StartMinimized
         {
             get => this._startMinimizedField;
             set => this._startMinimizedField = value;
@@ -53,8 +53,7 @@
             set => this._chooseAFitComboBoxIndex = value;
         }
 
-        /// <remarks/>
-        public OptionsSettings Settings //Свойство для доступа к объекту 
+        public OptionsSettings Settings 
         {
             get => this._settingsField;
             set => this._settingsField = value;
@@ -65,11 +64,11 @@
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     public partial class OptionsSettings
     {
-        private string _wallpapperPath; //добавить громкость чтобы сохранялась 
+        private string _wallpapperPath; 
 
         private string _defaultInstallationPath; 
 
-        private OptionsSettingsMainTaskbarStyle _mainTaskbarStyleField; // Приватное поле для хранения объекта поднастроек основного стиля панели задач.
+        private OptionsSettingsMainTaskbarStyle _mainTaskbarStyleField;
 
         private OptionsSettingsMaximizedTaskbarStyle _maximizedTaskbarStyleField;
 
@@ -98,10 +97,10 @@
         }
     }
 
-    [System.SerializableAttribute()]  // Аналогично
+    [System.SerializableAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
-    public partial class OptionsSettingsMainTaskbarStyle //Объявление класса OptionsSettingsMainTaskbarStyle, представляющего поднастройки основного стиля панели задач.
+    public partial class OptionsSettingsMainTaskbarStyle
     {
         private byte _accentStateField;
 
@@ -113,8 +112,7 @@
 
         private byte _windowsAccentAlphaField;
 
-        /// <remarks/>
-        public byte AccentState //Свойство для доступа к параметру "AccentState". Возвращает accentStateField и устанавливает его значение, вызывая Taskbars.UpdateAccentState() при изменении.
+        public byte AccentState
         {
             get => this._accentStateField;
             set
@@ -124,8 +122,7 @@
             }
         }
 
-        /// <remarks/>
-        public string GradientColor //Аналогично
+        public string GradientColor
         {
             get => this._gradientColorField;
             set
@@ -135,8 +132,7 @@
             }
         }
 
-        /// <remarks/>
-        public bool Colorize //Аналогично
+        public bool Colorize
         {
             get => this._colorizeField;
             set
@@ -146,8 +142,7 @@
             }
         }
 
-        /// <remarks/>
-        public bool UseWindowsAccentColor //Аналогично
+        public bool UseWindowsAccentColor
         {
             get => this._useWindowsAccentColorField;
             set
@@ -157,20 +152,17 @@
             }
         }
 
-        /// <remarks/>
-        public byte WindowsAccentAlpha //Аналогично
+        public byte WindowsAccentAlpha
         {
             get => this._windowsAccentAlphaField;
             set
             {
                 this._windowsAccentAlphaField = value;
-                Taskbars.UpdateColor(); //if (UseWindowsAccentColor) { Taskbars.UpdateColor(); }  //zdifcfhgvxdflgxfgkdkfhcvhncfdfhddfxff
+                Taskbars.UpdateColor();
             }
         }
     }
 
-    //Аналогично
-    /// <remarks/>
     [System.SerializableAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
@@ -186,7 +178,6 @@
 
         private byte _windowsAccentAlphaField;
 
-        /// <remarks/>
         public byte AccentState
         {
             get => this._accentStateField;
@@ -197,7 +188,6 @@
             }
         }
 
-        /// <remarks/>
         public string GradientColor
         {
             get => this._gradientColorField;
@@ -207,8 +197,6 @@
                 Taskbars.UpdateColor();
             }
         }
-
-        /// <remarks/>
         public bool Colorize
         {
             get => this._colorizeField;
@@ -218,8 +206,6 @@
                 Taskbars.UpdateAccentFlags();
             }
         }
-
-        /// <remarks/>
         public bool UseWindowsAccentColor
         {
             get => this._useWindowsAccentColorField;
@@ -230,14 +216,13 @@
             }
         }
 
-        /// <remarks/>
         public byte WindowsAccentAlpha
         {
             get => this._windowsAccentAlphaField;
             set
             {
                 this._windowsAccentAlphaField = value;
-                Taskbars.UpdateColor(); //if (UseWindowsAccentColor) { Taskbars.UpdateColor();}
+                Taskbars.UpdateColor();
             }
         }
     }

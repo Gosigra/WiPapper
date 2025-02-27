@@ -19,8 +19,6 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
 
         public static void IsBrowserInitialized(object sender, DependencyPropertyChangedEventArgs e)
         {
-            //(sender as ChromiumWebBrowser).IsBrowserInitializedChanged -= IsBrowserInitialized;
-
             sessionManager.CurrentSessionChanged += SessionManager_CurrentSessionChanged;
             SetHtmlWallpaper.Browser.FrameLoadEnd += Browser_FrameLoadEnd;
 
@@ -56,7 +54,7 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
             }
         }
 
-        private static void SessionManager_CurrentSessionChanged(GlobalSystemMediaTransportControlsSessionManager smtc, CurrentSessionChangedEventArgs args)                // между разными обектами (браузеры приложения )
+        private static void SessionManager_CurrentSessionChanged(GlobalSystemMediaTransportControlsSessionManager smtc, CurrentSessionChangedEventArgs args)
         {
             var currentSession = smtc.GetCurrentSession();
 
@@ -66,14 +64,12 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
 
         private static void UpdateSession(GlobalSystemMediaTransportControlsSession newSession)
         {
-            // Отписка от события старого объекта session
             if (session != null)
             {
                 session.MediaPropertiesChanged -= Session_MediaPropertiesChanged;
                 session.PlaybackInfoChanged -= Session_PlaybackInfoChanged;
             }
 
-            // Обновление объекта session и подписка на событие нового объекта session
             session = newSession;
             if (session != null)
             {
@@ -115,6 +111,7 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
             }
             if (properties == null)
                 return;
+
             mediaProperties.AlbumArtist = properties.AlbumArtist;
             mediaProperties.AlbumTitle = properties.AlbumTitle;
             mediaProperties.AlbumTrackCount = properties.AlbumTrackCount;
@@ -125,6 +122,7 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
             mediaProperties.ThumbnailURL = await GetThumbnailAsBase64String(properties.Thumbnail);
             mediaProperties.Title = properties.Title;
             mediaProperties.TrackNumber = properties.TrackNumber;
+
             UpdateWebView();
         }
 
@@ -134,13 +132,13 @@ namespace WiPapper.Wallpaper.HtmlWallpaper
 
             IRandomAccessStream fileStream = await Thumbnail.OpenReadAsync();
 
-            // 2. Преобразование IRandomAccessStream в массив байтов
+            //Преобразование IRandomAccessStream в массив байтов
             var reader = new DataReader(fileStream.GetInputStreamAt(0));
             var bytes = new byte[fileStream.Size];
             await reader.LoadAsync((uint)fileStream.Size);
             reader.ReadBytes(bytes);
 
-            // 3. Преобразование массива байтов в строку Base64
+            //Преобразование массива байтов в строку Base64
             string base64String = $"data:image/png;base64,{Convert.ToBase64String(bytes)}";
 
             mediaProperties.ThumbnailURL = base64String;

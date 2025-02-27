@@ -45,7 +45,6 @@ namespace WiPapper
             Application.Current.Dispatcher.Invoke(() => DowloadProgressGrid.Visibility = Visibility.Visible);
 
             await DownloadWallpaperAsync(folderPath, button.Tag.ToString());
-            //MessageBox.Show("Обои успешно скачаны");
 
             Application.Current.Dispatcher.Invoke(() => DowloadProgressGrid.Visibility = Visibility.Collapsed);
         }

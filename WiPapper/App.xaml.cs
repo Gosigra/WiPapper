@@ -35,12 +35,11 @@ namespace WiPapper
             e.Handled = true;
         }
 
+        // Освобождение ресурсов и завершение фоновых задач
         protected override void OnExit(ExitEventArgs e)
         {
             base.OnExit(e);
 
-            // Освобождение ресурсов и завершение фоновых задач
-            // ...
         }
     }
 
